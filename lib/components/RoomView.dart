@@ -3,10 +3,12 @@ import 'package:bias_profile/constants.dart';
 
 class RoomView extends StatelessWidget {
   final double containerWidth;
+  final List<String> userNames;
 
   const RoomView({
     super.key,
     required this.containerWidth,
+    required this.userNames,
   });
 
   @override
@@ -28,7 +30,27 @@ class RoomView extends StatelessWidget {
                 child: Column(
                   children: [
                     Text('参加メンバー'),
-                    Text('ここに参加メンバーを表示'),
+                    Column(
+                      children: userNames.map((name) {
+                        return Card(
+                          child: Container(
+                            width: double.infinity,
+                            height: 36.0,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            alignment: Alignment.center, // これがポイント！
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0), // 左右に少し余裕を持たせる
+                            child: Text(
+                              name,
+                              textAlign: TextAlign.center, // Text自体も中央揃えにする
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    )
                   ],
                 ),
               ),
