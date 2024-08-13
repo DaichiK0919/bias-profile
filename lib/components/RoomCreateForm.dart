@@ -14,22 +14,17 @@ class NicknameForm extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: EdgeInsets.all(kPaddingMedium),
-              child: Text(
-                  style: TextStyle(
-                    fontSize: kFontSizeMedium,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'ニックネームを入力',
+                    labelStyle: Theme.of(context).textTheme.labelMedium,
+                    border: OutlineInputBorder(),
                   ),
-                  'ニックネームを入力'),
-            ),
-            Padding(
-              padding: EdgeInsets.all(kPaddingMedium),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'ヒントテキスト',
-                  border: OutlineInputBorder(),
                 ),
-              ),
+              ],
             ),
             Padding(
               padding: EdgeInsets.all(kPaddingLarge),
