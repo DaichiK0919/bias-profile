@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bias_profile/constants.dart';
 import 'package:bias_profile/RoomViewPage.dart';
@@ -33,6 +34,41 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
     return true;
   }
 
+  Future<void> createRoom(String nickname) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    Timestamp now = Timestamp.now();
+
+    // プレイヤーの情報を Map にする
+    Map<String, dynamic> players = {
+      'nickname': nickname,
+      'ever_been_parent': false,
+      'points': 0,
+      'created_at': now,
+      'updated_at': now,
+    };
+
+    // ターンの情報を Map にする
+    Map<String, dynamic> current_turn = {
+      'turn_count': 0,
+      'character_cards': [],
+      'profiles': [],
+      'parent_player_id': null,
+      'created_at': now,
+      'updated_at': now,
+    };
+
+    // 部屋ドキュメントを作成し、各フィールドを設定
+    DocumentReference roomRef = await firestore.collection('rooms').add({
+      'status': 'waiting',
+      'players': [players], // プレイヤーリストに作成者を追加
+      'turns': [current_turn], // 初期ターンを追加
+      'createdAt': now,
+      'updatedAt': now,
+    });
+
+    print('部屋と作成者、ターンの情報が保存されました。');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -51,7 +87,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                       if (value == null || value.isEmpty) {
                         return 'ニックネームを入力してください。';
                       }
-                      if (!isValidNickname(value!)) {
+                      if (!isValidNickname(value)) {
                         return 'ニックネームは10文字以下で入力してください。';
                       }
                       return null;
@@ -73,6 +109,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                   if (_formKey.currentState!.validate()) {
                     // バリデーションが成功した場合
                     String nickname = _nicknameController.text;
+                    createRoom(_nicknameController.text);
                     Navigator.push(
                       context,
                       MaterialPageRoute(

@@ -49,7 +49,7 @@ class RoomView extends StatelessWidget {
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(8.0),
                                 ),
-                                alignment: Alignment.center, // これがポイント！
+                                alignment: Alignment.centerLeft,
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 16.0), // 左右に少し余裕を持たせる
                                 child: Text(
@@ -68,7 +68,7 @@ class RoomView extends StatelessWidget {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8.0),
                             ),
-                            alignment: Alignment.center, // これがポイント！
+                            alignment: Alignment.centerLeft, // これがポイント！
                             padding: EdgeInsets.symmetric(
                                 horizontal: 16.0), // 左右に少し余裕を持たせる
                             child: Text(
