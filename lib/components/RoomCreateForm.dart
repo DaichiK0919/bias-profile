@@ -16,6 +16,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nicknameController =
       TextEditingController(); //入力されたニックネームのStateを管理
+  FirebaseFirestore db = FirebaseFirestore.instance;
 
   bool isValidNickname(String nickname) {
     // 文字数制限の例
@@ -34,8 +35,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
     return true;
   }
 
-  Future<void> createRoom(String nickname) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
+  Future<DocumentReference> createRoom(String nickname) async {
     Timestamp now = Timestamp.now();
 
     // プレイヤーの情報を Map にする
@@ -58,7 +58,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
     };
 
     // 部屋ドキュメントを作成し、各フィールドを設定
-    DocumentReference roomRef = await firestore.collection('rooms').add({
+    DocumentReference roomRef = await db.collection('rooms').add({
       'status': 'waiting',
       'players': [players], // プレイヤーリストに作成者を追加
       'turns': [current_turn], // 初期ターンを追加
@@ -66,7 +66,9 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
       'updatedAt': now,
     });
 
-    print('部屋と作成者、ターンの情報が保存されました。');
+    print('部屋と作成者、ターンの情報が保存されました。IDは : ${roomRef.id} です');
+
+    return roomRef;
   }
 
   @override
@@ -105,15 +107,19 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
             Padding(
               padding: EdgeInsets.all(kPaddingLarge),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     // バリデーションが成功した場合
                     String nickname = _nicknameController.text;
-                    createRoom(_nicknameController.text);
+                    DocumentReference roomRef =
+                        await createRoom(_nicknameController.text);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RoomViewPage(nickname: nickname),
+                        builder: (context) => RoomViewPage(
+                          nickname: nickname,
+                          roomId: roomRef.id,
+                        ),
                       ),
                     );
                     // 部屋作成のロジックをここに追加

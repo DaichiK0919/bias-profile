@@ -5,12 +5,14 @@ class RoomView extends StatelessWidget {
   final double containerWidth;
   final List<String> userNames;
   final String nickname;
+  final String roomId;
 
   const RoomView({
     super.key,
     required this.containerWidth,
     required this.userNames,
     required this.nickname,
+    required this.roomId,
   });
 
   @override
@@ -91,7 +93,7 @@ class RoomView extends StatelessWidget {
                           '部屋リンク',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        Text('部屋リンクURLを表示'),
+                        Text('https://hogehogehoge.com/?room_id=$roomId'),
                       ],
                     ),
                   ),
