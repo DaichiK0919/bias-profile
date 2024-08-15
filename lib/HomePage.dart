@@ -13,15 +13,15 @@ class HomePage extends StatelessWidget {
         body: LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.maxWidth < 600) {
-              return NicknameForm(
+              return RoomCreateForm(
                 containerWidth: 300,
               );
             } else if (constraints.maxWidth < 1024) {
-              return NicknameForm(
+              return RoomCreateForm(
                 containerWidth: 500,
               );
             } else {
-              return NicknameForm(
+              return RoomCreateForm(
                 containerWidth: 500,
               );
             }

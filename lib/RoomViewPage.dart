@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:bias_profile/components/components.dart';
 
 class RoomViewPage extends StatelessWidget {
-  final List<String> Users = const ['ひろと', 'ひろや', 'なおゆき', 'だいち'];
+  final List<String> Users = const [];
+  final String nickname;
 
-  const RoomViewPage({super.key});
+  const RoomViewPage({super.key, required this.nickname});
 
   @override
   Widget build(BuildContext context) {
@@ -18,16 +19,19 @@ class RoomViewPage extends StatelessWidget {
             return RoomView(
               containerWidth: 300,
               userNames: Users,
+              nickname: nickname,
             );
           } else if (constraints.maxWidth < 1024) {
             return RoomView(
               containerWidth: 500,
               userNames: Users,
+              nickname: nickname,
             );
           } else {
             return RoomView(
               containerWidth: 500,
               userNames: Users,
+              nickname: nickname,
             );
           }
         },
