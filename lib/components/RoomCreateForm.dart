@@ -36,15 +36,11 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
   }
 
   Future<DocumentReference> createRoom(String nickname) async {
-    Timestamp now = Timestamp.now();
-
     // プレイヤーの情報を Map にする
     Map<String, dynamic> players = {
       'nickname': nickname,
       'ever_been_parent': false,
       'points': 0,
-      'created_at': now,
-      'updated_at': now,
     };
 
     // ターンの情報を Map にする
@@ -53,17 +49,17 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
       'character_cards': [],
       'profiles': [],
       'parent_player_id': null,
-      'created_at': now,
-      'updated_at': now,
+      'created_at': FieldValue.serverTimestamp(),
+      'updated_at': FieldValue.serverTimestamp(),
     };
 
     // 部屋ドキュメントを作成し、各フィールドを設定
     DocumentReference roomRef = await db.collection('rooms').add({
       'status': 'waiting',
       'players': [players], // プレイヤーリストに作成者を追加
-      'turns': [current_turn], // 初期ターンを追加
-      'createdAt': now,
-      'updatedAt': now,
+      'turns': current_turn, // 初期ターンを追加
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
 
     print('部屋と作成者、ターンの情報が保存されました。IDは : ${roomRef.id} です');
@@ -111,18 +107,22 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                   if (_formKey.currentState!.validate()) {
                     // バリデーションが成功した場合
                     String nickname = _nicknameController.text;
-                    DocumentReference roomRef =
-                        await createRoom(_nicknameController.text);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RoomViewPage(
-                          nickname: nickname,
-                          roomId: roomRef.id,
+                    try {
+                      DocumentReference roomRef = await createRoom(nickname);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RoomViewPage(
+                            nickname: nickname,
+                            roomId: roomRef.id,
+                          ),
                         ),
-                      ),
-                    );
-                    // 部屋作成のロジックをここに追加
+                      );
+                    } catch (e) {
+                      print('Error creating room: $e');
+                      // エラーメッセージを表示する
+                    }
                   } else {
                     // バリデーションが失敗した場合
                     // エラーメッセージが表示されます
