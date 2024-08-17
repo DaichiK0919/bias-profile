@@ -29,7 +29,8 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
+/build/ad
+firebase_options.dart
 
 # Symbolication related
 app.*.symbols
