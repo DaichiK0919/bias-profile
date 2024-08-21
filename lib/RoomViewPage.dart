@@ -19,16 +19,22 @@ class RoomViewPage extends StatelessWidget {
           if (constraints.maxWidth < 600) {
             return RoomView(
               containerWidth: 300,
+              userNames: users,
+              nickname: nickname,
               roomId: roomId,
             );
           } else if (constraints.maxWidth < 1024) {
             return RoomView(
               containerWidth: 500,
+              userNames: users,
+              nickname: nickname,
               roomId: roomId,
             );
           } else {
             return RoomView(
               containerWidth: 500,
+              userNames: users,
+              nickname: nickname,
               roomId: roomId,
             );
           }
