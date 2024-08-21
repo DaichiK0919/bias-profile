@@ -1,25 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:bias_profile/constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class RoomView extends StatelessWidget {
+class RoomView extends StatefulWidget {
   final double containerWidth;
-  final List<String> userNames;
-  final String nickname;
   final String roomId;
 
   const RoomView({
     super.key,
     required this.containerWidth,
-    required this.userNames,
-    required this.nickname,
     required this.roomId,
   });
 
   @override
+  State<RoomView> createState() => _RoomViewState();
+}
+
+class _RoomViewState extends State<RoomView> {
+  late Future<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
+  List<String> userNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _documentSnapshot =
+        FirebaseFirestore.instance.collection('rooms').doc(widget.roomId).get();
+  }
+
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: containerWidth,
+        width: widget.containerWidth,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -41,44 +52,42 @@ class RoomView extends StatelessWidget {
                           '参加メンバー',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        Column(
-                          children: userNames.map((name) {
-                            return Card(
-                              child: Container(
-                                width: double.infinity,
-                                height: 36.0,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                alignment: Alignment.centerLeft,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 16.0), // 左右に少し余裕を持たせる
-                                child: Text(
-                                  name,
-                                  textAlign: TextAlign.center, // Text自体も中央揃えにする
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        Card(
-                          child: Container(
-                            width: double.infinity,
-                            height: 36.0,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            alignment: Alignment.centerLeft, // これがポイント！
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0), // 左右に少し余裕を持たせる
-                            child: Text(
-                              nickname,
-                              textAlign: TextAlign.center, // Text自体も中央揃えにする
-                            ),
-                          ),
-                        ),
+                        FutureBuilder<DocumentSnapshot>(
+                            future: _documentSnapshot,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else {
+                                final data = snapshot.data!.data()
+                                    as Map<String, dynamic>;
+                                final players =
+                                    data['players'] as List<dynamic>;
+                                return Column(
+                                  children: players.map((player) {
+                                    return Card(
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 36.0,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        alignment: Alignment.centerLeft,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 16.0), // 左右に少し余裕を持たせる
+                                        child: Text(
+                                          player['nickname'],
+                                          textAlign: TextAlign
+                                              .center, // Text自体も中央揃えにする
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
+                              }
+                            }),
                       ],
                     ),
                   ),
@@ -93,7 +102,8 @@ class RoomView extends StatelessWidget {
                           '部屋リンク',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        Text('https://hogehogehoge.com/?room_id=$roomId'),
+                        Text(
+                            'https://hogehogehoge.com/?room_id=${widget.roomId}'),
                       ],
                     ),
                   ),
