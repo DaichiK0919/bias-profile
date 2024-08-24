@@ -114,7 +114,6 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => RoomViewPage(
-                            nickname: nickname,
                             roomId: roomRef.id,
                           ),
                         ),
