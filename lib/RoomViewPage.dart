@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:bias_profile/components/components.dart';
 
 class RoomViewPage extends StatelessWidget {
-  final List<String> users = const [];
-  final String nickname;
   final String roomId;
 
-  const RoomViewPage({super.key, required this.nickname, required this.roomId});
+  const RoomViewPage({super.key, required this.roomId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('部屋'),
+        automaticallyImplyLeading: false,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bias_profile/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 class RoomView extends StatefulWidget {
   final double containerWidth;
@@ -17,17 +18,20 @@ class RoomView extends StatefulWidget {
 }
 
 class _RoomViewState extends State<RoomView> {
-  late Future<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
-  List<String> userNames = [];
+  late Stream<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
 
   @override
   void initState() {
     super.initState();
-    _documentSnapshot =
-        FirebaseFirestore.instance.collection('rooms').doc(widget.roomId).get();
+    _documentSnapshot = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId)
+        .snapshots();
   }
 
   Widget build(BuildContext context) {
+    final String url = 'https://hogehogehoge.com/?room_id=${widget.roomId}';
+
     return Center(
       child: Container(
         width: widget.containerWidth,
@@ -39,6 +43,7 @@ class _RoomViewState extends State<RoomView> {
               children: [
                 Container(
                   width: double.infinity,
+                  margin: EdgeInsets.symmetric(vertical: kMarginLarge),
                   decoration: BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(16.0), // 角を丸くする
@@ -52,8 +57,8 @@ class _RoomViewState extends State<RoomView> {
                           '参加メンバー',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        FutureBuilder<DocumentSnapshot>(
-                            future: _documentSnapshot,
+                        StreamBuilder<DocumentSnapshot>(
+                            stream: _documentSnapshot,
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
@@ -92,18 +97,36 @@ class _RoomViewState extends State<RoomView> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.all(kPaddingLarge),
-                  child: Container(
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.symmetric(vertical: kMarginLarge),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(16.0), // 角を丸くする
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(kPaddingLarge),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '部屋リンク',
+                          'URL',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        Text(
-                            'https://hogehogehoge.com/?room_id=${widget.roomId}'),
+                        Text(url),
+                        Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: url));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('URLがクリップボードにコピーされました'),
+                                ),
+                              );
+                            },
+                            child: Text('コピー'),
+                          ),
+                        )
                       ],
                     ),
                   ),
