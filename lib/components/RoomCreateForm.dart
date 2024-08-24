@@ -20,7 +20,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
 
   bool isValidNickname(String nickname) {
     // 文字数制限の例
-    if (nickname.length > 10) {
+    if (nickname.length < 2 || nickname.length > 10) {
       return false;
     }
     // // 使用可能な文字の制限の例 (アルファベットと数字のみ)
@@ -55,9 +55,9 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
 
     // 部屋ドキュメントを作成し、各フィールドを設定
     DocumentReference roomRef = await db.collection('rooms').add({
-      'status': 'waiting',
+      'status': 'recruiting',
       'players': [players], // プレイヤーリストに作成者を追加
-      'turns': current_turn, // 初期ターンを追加
+      'current_turn': current_turn, // 初期ターンを追加
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });

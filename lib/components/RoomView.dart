@@ -29,9 +29,108 @@ class _RoomViewState extends State<RoomView> {
         .snapshots();
   }
 
+  Future<void> _startRoom() async {
+    await FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId)
+        .update({
+      'status': 'preparing',
+      'current_turn.turn_count': 1,
+      'current_turn.updated_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _closeRoom() async {
+    await FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId)
+        .update({
+      'status': 'closed',
+      'current_turn.updated_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _showStartConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('確認'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('応募を締め切りますか'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('閉じる'),
+              onPressed: () {
+                Navigator.of(context).pop(); // ダイアログを閉じる
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () async {
+                await _startRoom(); // Roomのstatusをin_progressに更新 current_turn.turn_countを1に更新
+                Navigator.of(context).pop(); // ダイアログを閉じる
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('ゲームが開始されます'),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showCloseConfirmationDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('確認'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('本当にキャンセルしますか？'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('閉じる'),
+              onPressed: () {
+                Navigator.of(context).pop(); // ダイアログを閉じる
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () async {
+                await _closeRoom(); // Roomのstatusをcloseに更新
+                Navigator.popUntil(
+                    context, ModalRoute.withName('/')); // ダイアログを閉じる
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('部屋の作成をキャンセルしました'),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget build(BuildContext context) {
     final String url = 'https://hogehogehoge.com/?room_id=${widget.roomId}';
-
     return Center(
       child: Container(
         width: widget.containerWidth,
@@ -136,8 +235,8 @@ class _RoomViewState extends State<RoomView> {
             Padding(
               padding: EdgeInsets.all(kPaddingMedium),
               child: ElevatedButton(
-                onPressed: () {
-                  print('clicked!');
+                onPressed: () async {
+                  _showStartConfirmationDialog(context);
                 },
                 child: Text('締め切る'),
               ),
@@ -146,7 +245,7 @@ class _RoomViewState extends State<RoomView> {
               padding: EdgeInsets.all(kPaddingMedium),
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  _showCloseConfirmationDialog(context);
                 },
                 child: Text('キャンセル'),
               ),
