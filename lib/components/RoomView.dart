@@ -130,7 +130,9 @@ class _RoomViewState extends State<RoomView> {
   }
 
   Widget build(BuildContext context) {
+    
     final String url = 'https://hogehogehoge.com/?room_id=${widget.roomId}';
+    
     return Center(
       child: Container(
         width: widget.containerWidth,
