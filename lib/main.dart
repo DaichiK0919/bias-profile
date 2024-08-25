@@ -22,7 +22,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
       ),
-      home: HomePage(),
+      routes: {
+        '/': (context) => const HomePage(),
+      },
     );
   }
 }
