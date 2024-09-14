@@ -6,11 +6,13 @@ import 'package:flutter/services.dart';
 class RoomView extends StatefulWidget {
   final double containerWidth;
   final String roomId;
+  final String playerId;
 
   const RoomView({
     super.key,
     required this.containerWidth,
     required this.roomId,
+    required this.playerId,
   });
 
   @override
@@ -29,15 +31,38 @@ class _RoomViewState extends State<RoomView> {
         .snapshots();
   }
 
-  Future<void> _startRoom() async {
-    await FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .update({
-      'status': 'preparing',
-      'current_turn.turn_count': 1,
-      'current_turn.updated_at': FieldValue.serverTimestamp(),
-    });
+  Future<void> _startRoom(String playerId) async {
+    DocumentReference roomRef =
+        FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+
+    // Firestoreから部屋のドキュメントを取得
+    DocumentSnapshot roomSnapshot = await roomRef.get();
+    Map<String, dynamic> roomData = roomSnapshot.data() as Map<String, dynamic>;
+
+    // プレイヤーリストを取得
+    List<dynamic> players = roomData['players'];
+
+    // UUIDで特定のプレイヤーを見つける
+    bool playerFound = false;
+    for (var player in players) {
+      if (player['player_id'] == playerId) {
+        player['can_start_next_turn'] = true;
+        playerFound = true;
+        break; // プレイヤーを見つけたらループを終了
+      }
+    }
+
+    if (playerFound) {
+      // 更新のためにプレイヤーリスト全体をFirestoreにアップデート
+      await roomRef.update({
+        'players': players,
+        'current_turn.updated_at': FieldValue.serverTimestamp(),
+      });
+
+      print('プレイヤー $playerId のcan_start_next_turnが更新されました。');
+    } else {
+      print('プレイヤー $playerId が見つかりませんでした。');
+    }
   }
 
   Future<void> _closeRoom() async {
@@ -74,7 +99,7 @@ class _RoomViewState extends State<RoomView> {
             TextButton(
               child: Text('OK'),
               onPressed: () async {
-                await _startRoom(); // Roomのstatusをin_progressに更新 current_turn.turn_countを1に更新
+                await _startRoom(widget.playerId); // Roomのstatusを
                 Navigator.of(context).pop(); // ダイアログを閉じる
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -130,9 +155,8 @@ class _RoomViewState extends State<RoomView> {
   }
 
   Widget build(BuildContext context) {
-    
     final String url = 'https://hogehogehoge.com/?room_id=${widget.roomId}';
-    
+
     return Center(
       child: Container(
         width: widget.containerWidth,
