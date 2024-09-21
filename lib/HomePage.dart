@@ -7,25 +7,26 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('偏見プロフィール'),
-        ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            if (constraints.maxWidth < 600) {
-              return RoomCreateForm(
-                containerWidth: 300,
-              );
-            } else if (constraints.maxWidth < 1024) {
-              return RoomCreateForm(
-                containerWidth: 500,
-              );
-            } else {
-              return RoomCreateForm(
-                containerWidth: 500,
-              );
-            }
-          },
-        ));
+      appBar: AppBar(
+        title: Text('偏見プロフィール'),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 600) {
+            return RoomCreateForm(
+              containerWidth: 300,
+            );
+          } else if (constraints.maxWidth < 1024) {
+            return RoomCreateForm(
+              containerWidth: 500,
+            );
+          } else {
+            return RoomCreateForm(
+              containerWidth: 500,
+            );
+          }
+        },
+      ),
+    );
   }
 }

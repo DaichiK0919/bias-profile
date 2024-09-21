@@ -31,29 +31,43 @@ class _RoomViewState extends State<RoomView> {
         .snapshots();
   }
 
-  Future<void> _startRoom(String playerId) async {
-    DocumentReference roomRef =
-        FirebaseFirestore.instance.collection('rooms').doc(widget.roomId);
+  DocumentReference getRoomRef(String roomId) {
+    return FirebaseFirestore.instance.collection('rooms').doc(roomId);
+  }
 
-    // Firestoreから部屋のドキュメントを取得
-    DocumentSnapshot roomSnapshot = await roomRef.get();
-    Map<String, dynamic> roomData = roomSnapshot.data() as Map<String, dynamic>;
+  Future<Map<String, dynamic>> getRoomSnapshot(String roomId) async {
+    DocumentSnapshot roomSnapshot = await getRoomRef(roomId).get();
 
-    // プレイヤーリストを取得
+    if (!roomSnapshot.exists) {
+      throw Exception('Room not found');
+    }
+    return roomSnapshot.data() as Map<String, dynamic>;
+  }
+
+  // 現状使ってない関数　UUIDでplayerを探す
+  // Future<Map<String, dynamic>?> findPlayerByUUID(
+  //     String roomId, String playerId) async {
+  //   Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
+  //
+  //   // プレイヤーリストを取得
+  //   List<dynamic> players = roomData['players'];
+  //
+  //   // UUIDで特定のプレイヤーを見つける
+  //   return players.firstWhere((player) => player['player_id'] == playerId,
+  //       orElse: () => null);
+  // }
+
+  Future<void> startRoom(String roomId, String playerId) async {
+    DocumentReference roomRef = getRoomRef(roomId);
+    Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
     List<dynamic> players = roomData['players'];
 
-    // UUIDで特定のプレイヤーを見つける
-    bool playerFound = false;
-    for (var player in players) {
-      if (player['player_id'] == playerId) {
-        player['can_start_next_turn'] = true;
-        playerFound = true;
-        break; // プレイヤーを見つけたらループを終了
-      }
-    }
+    int playerIndex =
+        players.indexWhere((player) => player['player_id'] == playerId);
 
-    if (playerFound) {
-      // 更新のためにプレイヤーリスト全体をFirestoreにアップデート
+    if (playerIndex != -1) {
+      players[playerIndex]['can_start_next_turn'] = true;
+
       await roomRef.update({
         'players': players,
         'current_turn.updated_at': FieldValue.serverTimestamp(),
@@ -81,7 +95,7 @@ class _RoomViewState extends State<RoomView> {
       barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('応募を締め切りますか？'),
+          title: Text('募集を締め切りますか？'),
           actions: <Widget>[
             TextButton(
               child: Text('閉じる'),
@@ -92,8 +106,24 @@ class _RoomViewState extends State<RoomView> {
             TextButton(
               child: Text('締め切る'),
               onPressed: () async {
-                await _startRoom(widget.playerId);
-                Navigator.of(context).pop(); // ダイアログを閉じる
+                await startRoom(widget.roomId, widget.playerId);
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return SimpleDialog(
+                      title: Text('ターンを開始する準備をしています。'),
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.all(kPaddingLarge),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                );
               },
             ),
           ],
