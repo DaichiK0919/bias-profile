@@ -81,14 +81,7 @@ class _RoomViewState extends State<RoomView> {
       barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('確認'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('応募を締め切りますか'),
-              ],
-            ),
-          ),
+          title: Text('応募を締め切りますか？'),
           actions: <Widget>[
             TextButton(
               child: Text('閉じる'),
@@ -97,15 +90,10 @@ class _RoomViewState extends State<RoomView> {
               },
             ),
             TextButton(
-              child: Text('OK'),
+              child: Text('締め切る'),
               onPressed: () async {
-                await _startRoom(widget.playerId); // Roomのstatusを
+                await _startRoom(widget.playerId);
                 Navigator.of(context).pop(); // ダイアログを閉じる
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('ゲームが開始されます'),
-                  ),
-                );
               },
             ),
           ],
@@ -120,14 +108,7 @@ class _RoomViewState extends State<RoomView> {
       barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('確認'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('本当にキャンセルしますか？'),
-              ],
-            ),
-          ),
+          title: Text('本当にキャンセルしますか？'),
           actions: <Widget>[
             TextButton(
               child: Text('閉じる'),
@@ -143,7 +124,7 @@ class _RoomViewState extends State<RoomView> {
                     context, ModalRoute.withName('/')); // ダイアログを閉じる
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('部屋の作成をキャンセルしました'),
+                    content: Text('キャンセルが完了しました'),
                   ),
                 );
               },

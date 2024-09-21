@@ -88,14 +88,15 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                   child: TextFormField(
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'ニックネームを入力してください。';
+                        return 'ニックネームを入力してください';
                       }
                       if (!isValidNickname(value)) {
-                        return 'ニックネームは10文字以下で入力してください。';
+                        return '2〜10文字で入力してください';
                       }
                       return null;
                     },
                     controller: _nicknameController,
+                    maxLength: 10,
                     decoration: InputDecoration(
                       labelText: 'ニックネームを入力',
                       labelStyle: Theme.of(context).textTheme.labelMedium,
