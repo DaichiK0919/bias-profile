@@ -6,11 +6,13 @@ import 'package:flutter/services.dart';
 class RoomView extends StatefulWidget {
   final double containerWidth;
   final String roomId;
+  final String playerId;
 
   const RoomView({
     super.key,
     required this.containerWidth,
     required this.roomId,
+    required this.playerId,
   });
 
   @override
@@ -29,15 +31,52 @@ class _RoomViewState extends State<RoomView> {
         .snapshots();
   }
 
-  Future<void> _startRoom() async {
-    await FirebaseFirestore.instance
-        .collection('rooms')
-        .doc(widget.roomId)
-        .update({
-      'status': 'preparing',
-      'current_turn.turn_count': 1,
-      'current_turn.updated_at': FieldValue.serverTimestamp(),
-    });
+  DocumentReference getRoomRef(String roomId) {
+    return FirebaseFirestore.instance.collection('rooms').doc(roomId);
+  }
+
+  Future<Map<String, dynamic>> getRoomSnapshot(String roomId) async {
+    DocumentSnapshot roomSnapshot = await getRoomRef(roomId).get();
+
+    if (!roomSnapshot.exists) {
+      throw Exception('Room not found');
+    }
+    return roomSnapshot.data() as Map<String, dynamic>;
+  }
+
+  // 現状使ってない関数　UUIDでplayerを探す
+  // Future<Map<String, dynamic>?> findPlayerByUUID(
+  //     String roomId, String playerId) async {
+  //   Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
+  //
+  //   // プレイヤーリストを取得
+  //   List<dynamic> players = roomData['players'];
+  //
+  //   // UUIDで特定のプレイヤーを見つける
+  //   return players.firstWhere((player) => player['player_id'] == playerId,
+  //       orElse: () => null);
+  // }
+
+  Future<void> startRoom(String roomId, String playerId) async {
+    DocumentReference roomRef = getRoomRef(roomId);
+    Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
+    List<dynamic> players = roomData['players'];
+
+    int playerIndex =
+        players.indexWhere((player) => player['player_id'] == playerId);
+
+    if (playerIndex != -1) {
+      players[playerIndex]['can_start_next_turn'] = true;
+
+      await roomRef.update({
+        'players': players,
+        'current_turn.updated_at': FieldValue.serverTimestamp(),
+      });
+
+      print('プレイヤー $playerId のcan_start_next_turnが更新されました。');
+    } else {
+      print('プレイヤー $playerId が見つかりませんでした。');
+    }
   }
 
   Future<void> _closeRoom() async {
@@ -56,14 +95,7 @@ class _RoomViewState extends State<RoomView> {
       barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('確認'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('応募を締め切りますか'),
-              ],
-            ),
-          ),
+          title: Text('募集を締め切りますか？'),
           actions: <Widget>[
             TextButton(
               child: Text('閉じる'),
@@ -72,14 +104,25 @@ class _RoomViewState extends State<RoomView> {
               },
             ),
             TextButton(
-              child: Text('OK'),
+              child: Text('締め切る'),
               onPressed: () async {
-                await _startRoom(); // Roomのstatusをin_progressに更新 current_turn.turn_countを1に更新
-                Navigator.of(context).pop(); // ダイアログを閉じる
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('ゲームが開始されます'),
-                  ),
+                await startRoom(widget.roomId, widget.playerId);
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return SimpleDialog(
+                      title: Text('ターンを開始する準備をしています。'),
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.all(kPaddingLarge),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -95,14 +138,7 @@ class _RoomViewState extends State<RoomView> {
       barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('確認'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('本当にキャンセルしますか？'),
-              ],
-            ),
-          ),
+          title: Text('本当にキャンセルしますか？'),
           actions: <Widget>[
             TextButton(
               child: Text('閉じる'),
@@ -118,7 +154,7 @@ class _RoomViewState extends State<RoomView> {
                     context, ModalRoute.withName('/')); // ダイアログを閉じる
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('部屋の作成をキャンセルしました'),
+                    content: Text('キャンセルが完了しました'),
                   ),
                 );
               },
@@ -130,9 +166,8 @@ class _RoomViewState extends State<RoomView> {
   }
 
   Widget build(BuildContext context) {
-    
     final String url = 'https://hogehogehoge.com/?room_id=${widget.roomId}';
-    
+
     return Center(
       child: Container(
         width: widget.containerWidth,

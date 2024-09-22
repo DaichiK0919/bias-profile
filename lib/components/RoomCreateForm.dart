@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:bias_profile/constants.dart';
 import 'package:bias_profile/RoomViewPage.dart';
+import 'package:uuid/uuid.dart';
 
 class RoomCreateForm extends StatefulWidget {
   final double containerWidth;
@@ -17,6 +18,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
   final TextEditingController _nicknameController =
       TextEditingController(); //入力されたニックネームのStateを管理
   FirebaseFirestore db = FirebaseFirestore.instance;
+  String playerId = Uuid().v4(); //playerごとのUUIDを取得
 
   bool isValidNickname(String nickname) {
     // 文字数制限の例
@@ -38,8 +40,10 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
   Future<DocumentReference> createRoom(String nickname) async {
     // プレイヤーの情報を Map にする
     Map<String, dynamic> players = {
+      'player_id': playerId,
       'nickname': nickname,
       'ever_been_parent': false,
+      'can_start_next_turn': false,
       'points': 0,
     };
 
@@ -49,6 +53,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
       'character_cards': [],
       'profiles': [],
       'parent_player_id': null,
+      'parent_answer': null,
       'created_at': FieldValue.serverTimestamp(),
       'updated_at': FieldValue.serverTimestamp(),
     };
@@ -58,8 +63,8 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
       'status': 'recruiting',
       'players': [players], // プレイヤーリストに作成者を追加
       'current_turn': current_turn, // 初期ターンを追加
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
+      'created_at': FieldValue.serverTimestamp(),
+      'updated_at': FieldValue.serverTimestamp(),
     });
 
     print('部屋と作成者、ターンの情報が保存されました。IDは : ${roomRef.id} です');
@@ -83,14 +88,15 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                   child: TextFormField(
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'ニックネームを入力してください。';
+                        return 'ニックネームを入力してください';
                       }
                       if (!isValidNickname(value)) {
-                        return 'ニックネームは10文字以下で入力してください。';
+                        return '2〜10文字で入力してください';
                       }
                       return null;
                     },
                     controller: _nicknameController,
+                    maxLength: 10,
                     decoration: InputDecoration(
                       labelText: 'ニックネームを入力',
                       labelStyle: Theme.of(context).textTheme.labelMedium,
@@ -115,6 +121,7 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                         MaterialPageRoute(
                           builder: (context) => RoomViewPage(
                             roomId: roomRef.id,
+                            playerId: playerId, //uuidをRoomViewPageに渡している
                           ),
                         ),
                       );
