@@ -96,7 +96,6 @@ class _RoomCreateFormState extends State<RoomCreateForm> {
                       return null;
                     },
                     controller: _nicknameController,
-                    maxLength: 10,
                     decoration: InputDecoration(
                       labelText: 'ニックネームを入力',
                       labelStyle: Theme.of(context).textTheme.labelMedium,

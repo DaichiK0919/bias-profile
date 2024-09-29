@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bias_profile/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:bias_profile/components/components.dart';
 
 class RoomView extends StatefulWidget {
   final double containerWidth;
@@ -87,82 +88,6 @@ class _RoomViewState extends State<RoomView> {
       'status': 'closed',
       'current_turn.updated_at': FieldValue.serverTimestamp(),
     });
-  }
-
-  Future<void> _showStartConfirmationDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('募集を締め切りますか？'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('閉じる'),
-              onPressed: () {
-                Navigator.of(context).pop(); // ダイアログを閉じる
-              },
-            ),
-            TextButton(
-              child: Text('締め切る'),
-              onPressed: () async {
-                await startRoom(widget.roomId, widget.playerId);
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return SimpleDialog(
-                      title: Text('ターンを開始する準備をしています。'),
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(kPaddingLarge),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showCloseConfirmationDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // ダイアログ外をタップしても閉じないようにする
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('本当にキャンセルしますか？'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('閉じる'),
-              onPressed: () {
-                Navigator.of(context).pop(); // ダイアログを閉じる
-              },
-            ),
-            TextButton(
-              child: Text('OK'),
-              onPressed: () async {
-                await _closeRoom(); // Roomのstatusをcloseに更新
-                Navigator.popUntil(
-                    context, ModalRoute.withName('/')); // ダイアログを閉じる
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('キャンセルが完了しました'),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   Widget build(BuildContext context) {
@@ -273,7 +198,16 @@ class _RoomViewState extends State<RoomView> {
               padding: EdgeInsets.all(kPaddingMedium),
               child: ElevatedButton(
                 onPressed: () async {
-                  _showStartConfirmationDialog(context);
+                  showConfirmationDialog(
+                      context: context,
+                      title: '募集を締め切りますか？',
+                      confirmButtonText: '締め切る',
+                      onCancel: () {},
+                      onConfirm: () async {
+                        await startRoom(widget.roomId, widget.playerId);
+                      },
+                      progressDialog:
+                          ProgressDialog(titleText: 'ターンを開始する準備をしています。'));
                 },
                 child: Text('締め切る'),
               ),
@@ -282,7 +216,19 @@ class _RoomViewState extends State<RoomView> {
               padding: EdgeInsets.all(kPaddingMedium),
               child: ElevatedButton(
                 onPressed: () {
-                  _showCloseConfirmationDialog(context);
+                  showConfirmationDialog(
+                      context: context,
+                      title: '本当にキャンセルしますか？',
+                      onCancel: () {},
+                      onConfirm: () async {
+                        await _closeRoom();
+                        Navigator.popUntil(context, ModalRoute.withName('/'));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('キャンセルが完了しました'),
+                          ),
+                        );
+                      });
                 },
                 child: Text('キャンセル'),
               ),
