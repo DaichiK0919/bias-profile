@@ -2,14 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/commons/ResponsiveLayout.dart';
 
-class RoomCreatePage extends StatelessWidget {
-  const RoomCreatePage({super.key});
+class RoomViewPage extends StatelessWidget {
+  final String roomId;
+  final String playerId;
+  final bool isCreator;
+
+  const RoomViewPage(
+      {super.key,
+      required this.roomId,
+      required this.playerId,
+      required this.isCreator});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('偏見プロフィール作成'),
+        title: isCreator ? Text('参加募集中') : Text('参加待ち・・・'),
+        automaticallyImplyLeading: false,
       ),
       body: ResponsiveLayout(
         breakPoints: [
@@ -18,7 +27,12 @@ class RoomCreatePage extends StatelessWidget {
           BreakPoint(minWidth: 0, containerWidth: 300),
         ],
         builder: (context, containerWidth) {
-          return RoomCreateForm(containerWidth: containerWidth);
+          return RoomViewForm(
+            containerWidth: containerWidth,
+            roomId: roomId,
+            playerId: playerId,
+            isCreator: isCreator,
+          );
         },
       ),
     );

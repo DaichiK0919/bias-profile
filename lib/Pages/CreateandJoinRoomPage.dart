@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:bias_profile/RoomViewPage.dart';
-import 'package:bias_profile/components/RoomEnterForm.dart';
+import 'package:bias_profile/Pages/RoomViewPage.dart';
+import 'package:bias_profile/components/RoomEntryForm.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class RoomJoinCreatePage extends StatefulWidget {
+class CreateandJoinRoomPage extends StatefulWidget {
   final double containerWidth;
 
-  const RoomJoinCreatePage({super.key, required this.containerWidth});
+  const CreateandJoinRoomPage({super.key, required this.containerWidth});
 
   @override
-  _RoomJoinCreatePageState createState() => _RoomJoinCreatePageState();
+  _CreateandJoinRoomPageState createState() => _CreateandJoinRoomPageState();
 }
 
-class _RoomJoinCreatePageState extends State<RoomJoinCreatePage> {
+class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
   String? _roomId;
   final String playerId = Uuid().v4();
   FirebaseFirestore db = FirebaseFirestore.instance;
+  bool isCreator = true;
 
   @override
   void initState() {
@@ -31,6 +32,19 @@ class _RoomJoinCreatePageState extends State<RoomJoinCreatePage> {
         _roomId = uri.queryParameters['roomId'];
       });
     }
+  }
+
+  void _onRoomCreated(String roomId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RoomViewPage(
+          roomId: roomId,
+          playerId: playerId,
+          isCreator: isCreator,
+        ),
+      ),
+    );
   }
 
   void _joinRoom(String roomId, String nickname) async {
@@ -51,7 +65,7 @@ class _RoomJoinCreatePageState extends State<RoomJoinCreatePage> {
       });
 
       print('Player added to room with ID: $roomId');
-
+      isCreator = false;
       // 参加成功後、RoomViewPageに遷移
       Navigator.push(
         context,
@@ -59,6 +73,7 @@ class _RoomJoinCreatePageState extends State<RoomJoinCreatePage> {
           builder: (context) => RoomViewPage(
             roomId: roomId,
             playerId: playerId,
+            isCreator: isCreator,
           ),
         ),
       );
@@ -68,24 +83,11 @@ class _RoomJoinCreatePageState extends State<RoomJoinCreatePage> {
     }
   }
 
-  void _onRoomCreated(String roomId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => RoomViewPage(
-          roomId: roomId,
-          playerId: playerId,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Room Joiner and Creator')),
       body: Center(
-        child: RoomEnterForm(
+        child: RoomEntryForm(
           containerWidth: widget.containerWidth,
           onRoomCreated: _onRoomCreated,
           onRoomJoined: _joinRoom,

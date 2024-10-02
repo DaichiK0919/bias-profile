@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
-import 'package:bias_profile/constants.dart';
+import 'package:bias_profile/commons/constants.dart';
 
-class RoomEnterForm extends StatefulWidget {
+class RoomEntryForm extends StatefulWidget {
   final double containerWidth;
   final Function(String) onRoomCreated;
   final Function(String, String) onRoomJoined;
   final String? initialRoomId;
 
-  const RoomEnterForm({
+  const RoomEntryForm({
     Key? key,
     required this.containerWidth,
     required this.onRoomCreated,
@@ -18,10 +18,10 @@ class RoomEnterForm extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<RoomEnterForm> createState() => _RoomEnterFormState();
+  State<RoomEntryForm> createState() => _RoomEntryFormState();
 }
 
-class _RoomEnterFormState extends State<RoomEnterForm> {
+class _RoomEntryFormState extends State<RoomEntryForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _roomIdController = TextEditingController();
@@ -100,6 +100,7 @@ class _RoomEnterFormState extends State<RoomEnterForm> {
                   ),
                 ),
                 SizedBox(height: 20),
+                Text('テスト用'),
                 TextFormField(
                   controller: _roomIdController,
                   decoration: InputDecoration(
@@ -118,9 +119,9 @@ class _RoomEnterFormState extends State<RoomEnterForm> {
               children: [
                 ElevatedButton(
                   onPressed: () async {
+                    String roomId = _roomIdController.text;
+                    String nickname = _nicknameController.text;
                     if (_formKey.currentState!.validate()) {
-                      String nickname = _nicknameController.text;
-                      String roomId = _roomIdController.text;
                       if (roomId.isNotEmpty) {
                         widget.onRoomJoined(roomId, nickname);
                       } else {
@@ -135,7 +136,9 @@ class _RoomEnterFormState extends State<RoomEnterForm> {
                       }
                     }
                   },
-                  child: Text('部屋に参加/作成'),
+                  child: widget.initialRoomId != null
+                      ? Text('部屋に参加する')
+                      : Text('部屋を作る'),
                 ),
               ],
             ),

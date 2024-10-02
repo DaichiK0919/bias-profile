@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:bias_profile/constants.dart';
+import 'package:bias_profile/commons/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 
-class RoomView extends StatefulWidget {
+class RoomViewForm extends StatefulWidget {
   final double containerWidth;
   final String roomId;
   final String playerId;
+  final bool isCreator;
 
-  const RoomView({
+  const RoomViewForm({
     super.key,
     required this.containerWidth,
     required this.roomId,
     required this.playerId,
+    required this.isCreator,
   });
 
   @override
-  State<RoomView> createState() => _RoomViewState();
+  State<RoomViewForm> createState() => _RoomViewFormState();
 }
 
-class _RoomViewState extends State<RoomView> {
+class _RoomViewFormState extends State<RoomViewForm> {
   late Stream<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
 
   @override
@@ -158,81 +160,106 @@ class _RoomViewState extends State<RoomView> {
                     ),
                   ),
                 ),
-                Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.symmetric(vertical: kMarginLarge),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(16.0), // 角を丸くする
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(kPaddingLarge),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'URL',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        Text(url),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: url));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('URLがクリップボードにコピーされました'),
-                                ),
-                              );
-                            },
-                            child: Text('コピー'),
-                          ),
-                        )
-                      ],
+                if (widget.isCreator)
+                  Container(
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(vertical: kMarginLarge),
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                     ),
-                  ),
-                ),
+                    child: Padding(
+                      padding: EdgeInsets.all(kPaddingLarge),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'URL',
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                          Text(url),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(text: url));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('URLがクリップボードにコピーされました'),
+                                  ),
+                                );
+                              },
+                              child: Text('コピー'),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
               ],
             ),
-            Padding(
-              padding: EdgeInsets.all(kPaddingMedium),
-              child: ElevatedButton(
-                onPressed: () async {
-                  showConfirmationDialog(
-                      context: context,
-                      title: '募集を締め切りますか？',
-                      confirmButtonText: '締め切る',
-                      onCancel: () {},
-                      onConfirm: () async {
-                        await startRoom(widget.roomId, widget.playerId);
-                      },
-                      progressDialog:
-                          ProgressDialog(titleText: 'ターンを開始する準備をしています。'));
-                },
-                child: Text('締め切る'),
+            if (widget.isCreator)
+              Padding(
+                padding: EdgeInsets.all(kPaddingMedium),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    showConfirmationDialog(
+                        context: context,
+                        title: '募集を締め切りますか？',
+                        confirmButtonText: '締め切る',
+                        onCancel: () {},
+                        onConfirm: () async {
+                          await startRoom(widget.roomId, widget.playerId);
+                        },
+                        progressDialog:
+                            ProgressDialog(titleText: 'ターンを開始する準備をしています。'));
+                  },
+                  child: Text('締め切る'),
+                ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(kPaddingMedium),
-              child: ElevatedButton(
-                onPressed: () {
-                  showConfirmationDialog(
-                      context: context,
-                      title: '本当にキャンセルしますか？',
-                      onCancel: () {},
-                      onConfirm: () async {
-                        await _closeRoom();
-                        Navigator.popUntil(context, ModalRoute.withName('/'));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('キャンセルが完了しました'),
-                          ),
-                        );
-                      });
-                },
-                child: Text('キャンセル'),
+            if (widget.isCreator)
+              Padding(
+                padding: EdgeInsets.all(kPaddingMedium),
+                child: ElevatedButton(
+                  onPressed: () {
+                    showConfirmationDialog(
+                        context: context,
+                        title: '本当にキャンセルしますか？',
+                        onCancel: () {},
+                        onConfirm: () async {
+                          await _closeRoom();
+                          Navigator.popUntil(context, ModalRoute.withName('/'));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('キャンセルが完了しました'),
+                            ),
+                          );
+                        });
+                  },
+                  child: Text('キャンセル'),
+                ),
+              )
+            else
+              Padding(
+                padding: EdgeInsets.all(kPaddingMedium),
+                child: ElevatedButton(
+                  onPressed: () {
+                    showConfirmationDialog(
+                        context: context,
+                        title: '本当にキャンセルしますか？',
+                        onCancel: () {},
+                        onConfirm: () async {
+                          await _closeRoom();
+                          Navigator.popUntil(context, ModalRoute.withName('/'));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('キャンセルが完了しました'),
+                            ),
+                          );
+                        });
+                  },
+                  child: Text('キャンセル'),
+                ),
               ),
-            )
           ],
         ),
       ),

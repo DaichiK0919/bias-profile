@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:bias_profile/constants.dart';
+import 'package:bias_profile/commons/constants.dart';
 
 class ProgressDialog extends StatelessWidget {
   final String titleText;
