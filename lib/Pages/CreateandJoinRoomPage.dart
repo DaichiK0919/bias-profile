@@ -1,3 +1,4 @@
+import 'package:bias_profile/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:bias_profile/Pages/RoomViewPage.dart';
@@ -48,7 +49,6 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
   }
 
   void _joinRoom(String roomId, String nickname) async {
-    print('Joining room with ID: $roomId and nickname: $nickname');
     Map<String, dynamic> playerData = {
       'player_id': playerId,
       'nickname': nickname,
@@ -60,26 +60,69 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
     try {
       // Firestoreで指定されたroomIdのドキュメントを更新し、プレイヤーを追加
       DocumentReference roomRef = db.collection('rooms').doc(roomId);
-      await roomRef.update({
-        'players': FieldValue.arrayUnion([playerData]), // プレイヤーを追加
-      });
+      DocumentSnapshot roomSnapshot = await roomRef.get();
 
-      print('Player added to room with ID: $roomId');
-      isCreator = false;
-      // 参加成功後、RoomViewPageに遷移
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RoomViewPage(
-            roomId: roomId,
-            playerId: playerId,
-            isCreator: isCreator,
-          ),
-        ),
-      );
+      showDialog(
+          context: context,
+          builder: (context) {
+            return ProgressDialog(titleText: '参加申請中です・・・');
+          });
+      await Future.delayed(Duration(seconds: 2));
+
+      if (roomSnapshot.exists) {
+        Map<String, dynamic> roomData =
+            roomSnapshot.data() as Map<String, dynamic>;
+        String status = roomData['status'];
+
+        if (status == 'recruiting') {
+          // プレイヤーを追加
+          await roomRef.update({
+            'players': FieldValue.arrayUnion([playerData]), // プレイヤーを追加
+          });
+
+          print('Player added to room with ID: $roomId');
+          isCreator = false;
+
+          // CircularProgressIndicatorを非表示にするためのダイアログを閉じる
+          Navigator.of(context).pop();
+
+          // 参加成功後、RoomViewPageに遷移
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RoomViewPage(
+                roomId: roomId,
+                playerId: playerId,
+                isCreator: isCreator,
+              ),
+            ),
+          );
+        } else {
+          // 参加できない場合の処理
+          print('Room is not in recruiting status');
+          // CircularProgressIndicatorを非表示にするためのダイアログを閉じる
+          Navigator.of(context).pop();
+          // スナックバーを表示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('参加数が上限に達しており参加することができませんでした')),
+          );
+        }
+      } else {
+        // ドキュメントが存在しない場合の処理
+        print('Room does not exist');
+        // CircularProgressIndicatorを非表示にするためのダイアログを閉じる
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('指定された部屋が存在しません')),
+        );
+      }
     } catch (e) {
       print('Error adding player to room: $e');
-      // エラーハンドリング（必要に応じてユーザーに通知）
+      // エラーハンドリング（CircularProgressIndicatorを非表示にしてエラーメッセージを表示）
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('エラーが発生しました。再度お試しください。')),
+      );
     }
   }
 

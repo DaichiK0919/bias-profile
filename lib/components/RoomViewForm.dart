@@ -47,18 +47,17 @@ class _RoomViewFormState extends State<RoomViewForm> {
     return roomSnapshot.data() as Map<String, dynamic>;
   }
 
-  // 現状使ってない関数　UUIDでplayerを探す
-  // Future<Map<String, dynamic>?> findPlayerByUUID(
-  //     String roomId, String playerId) async {
-  //   Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
-  //
-  //   // プレイヤーリストを取得
-  //   List<dynamic> players = roomData['players'];
-  //
-  //   // UUIDで特定のプレイヤーを見つける
-  //   return players.firstWhere((player) => player['player_id'] == playerId,
-  //       orElse: () => null);
-  // }
+  Future<Map<String, dynamic>?> findPlayerByUUID(
+      String roomId, String playerId) async {
+    Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
+
+    // プレイヤーリストを取得
+    List<dynamic> players = roomData['players'];
+
+    // UUIDで特定のプレイヤーを見つける
+    return players.firstWhere((player) => player['player_id'] == playerId,
+        orElse: () => null);
+  }
 
   Future<void> startRoom(String roomId, String playerId) async {
     DocumentReference roomRef = getRoomRef(roomId);
@@ -90,6 +89,30 @@ class _RoomViewFormState extends State<RoomViewForm> {
       'status': 'closed',
       'current_turn.updated_at': FieldValue.serverTimestamp(),
     });
+  }
+
+  Future<void> _leaveRoom(String roomId, String playerId) async {
+    try {
+      // プレイヤー情報を取得
+      Map<String, dynamic>? leavingPlayer =
+          await findPlayerByUUID(roomId, playerId);
+
+      if (leavingPlayer != null) {
+        // Firestoreのplayersリストからプレイヤーを削除
+        await FirebaseFirestore.instance
+            .collection('rooms')
+            .doc(roomId)
+            .update({
+          'players': FieldValue.arrayRemove([leavingPlayer]) // プレイヤーをリストから削除
+        });
+
+        print('Player left from room $roomId');
+      } else {
+        print('Player with ID $playerId not found in room $roomId');
+      }
+    } catch (e) {
+      print('Error removing player: $e');
+    }
   }
 
   Widget build(BuildContext context) {
@@ -248,7 +271,7 @@ class _RoomViewFormState extends State<RoomViewForm> {
                         title: '本当にキャンセルしますか？',
                         onCancel: () {},
                         onConfirm: () async {
-                          await _closeRoom();
+                          await _leaveRoom(widget.roomId, widget.playerId);
                           Navigator.popUntil(context, ModalRoute.withName('/'));
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
