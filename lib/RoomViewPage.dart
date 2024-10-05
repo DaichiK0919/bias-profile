@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bias_profile/components/components.dart';
+import 'package:bias_profile/commons/ResponsiveLayout.dart';
 
 class RoomViewPage extends StatelessWidget {
   final String roomId;
@@ -14,27 +15,17 @@ class RoomViewPage extends StatelessWidget {
         title: Text('部屋'),
         automaticallyImplyLeading: false,
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 600) {
-            return RoomView(
-              containerWidth: 300,
+      body: ResponsiveLayout(
+        breakPoints: [
+          BreakPoint(minWidth: 1024, containerWidth: 500),
+          BreakPoint(minWidth: 600, containerWidth: 500),
+          BreakPoint(minWidth: 0, containerWidth: 300),
+        ],
+        builder: (context, containerWidth) {
+          return RoomView(
+              containerWidth: containerWidth,
               roomId: roomId,
-              playerId: playerId,
-            );
-          } else if (constraints.maxWidth < 1024) {
-            return RoomView(
-              containerWidth: 500,
-              roomId: roomId,
-              playerId: playerId,
-            );
-          } else {
-            return RoomView(
-              containerWidth: 500,
-              roomId: roomId,
-              playerId: playerId,
-            );
-          }
+              playerId: playerId);
         },
       ),
     );

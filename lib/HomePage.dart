@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bias_profile/components/components.dart';
+import 'package:bias_profile/commons/ResponsiveLayout.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,21 +11,14 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text('偏見プロフィール'),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 600) {
-            return RoomCreateForm(
-              containerWidth: 300,
-            );
-          } else if (constraints.maxWidth < 1024) {
-            return RoomCreateForm(
-              containerWidth: 500,
-            );
-          } else {
-            return RoomCreateForm(
-              containerWidth: 500,
-            );
-          }
+      body: ResponsiveLayout(
+        breakPoints: [
+          BreakPoint(minWidth: 1024, containerWidth: 500),
+          BreakPoint(minWidth: 600, containerWidth: 500),
+          BreakPoint(minWidth: 0, containerWidth: 300),
+        ],
+        builder: (context, containerWidth) {
+          return RoomCreateForm(containerWidth: containerWidth);
         },
       ),
     );
