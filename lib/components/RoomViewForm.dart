@@ -116,7 +116,7 @@ class _RoomViewFormState extends State<RoomViewForm> {
   }
 
   Widget build(BuildContext context) {
-    final String url = 'https://hogehogehoge.com/?room_id=${widget.roomId}';
+    final String url = 'https://bias-profile.web.app/?room_id=${widget.roomId}';
 
     return Center(
       child: Container(

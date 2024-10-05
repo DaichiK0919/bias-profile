@@ -28,9 +28,9 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
 
   void _parseRoomIdFromUrl() {
     final uri = Uri.base;
-    if (uri.queryParameters.containsKey('roomId')) {
+    if (uri.queryParameters.containsKey('room_id')) {
       setState(() {
-        _roomId = uri.queryParameters['roomId'];
+        _roomId = uri.queryParameters['room_id'];
       });
     }
   }
