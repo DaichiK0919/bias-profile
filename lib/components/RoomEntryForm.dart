@@ -119,10 +119,13 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    String roomId = _roomIdController.text;
+                    String? roomId = widget.initialRoomId != null
+                        ? widget.initialRoomId
+                        : _roomIdController.text;
+                    // 本番は　roomId = widget.initialRoomId でOK
                     String nickname = _nicknameController.text;
                     if (_formKey.currentState!.validate()) {
-                      if (roomId.isNotEmpty) {
+                      if (roomId!.isNotEmpty) {
                         widget.onRoomJoined(roomId, nickname);
                       } else {
                         try {
@@ -136,9 +139,9 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
                       }
                     }
                   },
-                  child: widget.initialRoomId != null
-                      ? Text('部屋に参加する')
-                      : Text('部屋を作る'),
+                  child: widget.initialRoomId == null
+                      ? Text('部屋を作る')
+                      : Text('部屋に参加する'),
                 ),
               ],
             ),
