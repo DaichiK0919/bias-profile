@@ -1,3 +1,5 @@
+//TODO テスト用項目を削除する
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
@@ -24,7 +26,8 @@ class RoomEntryForm extends StatefulWidget {
 class _RoomEntryFormState extends State<RoomEntryForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nicknameController = TextEditingController();
-  final TextEditingController _roomIdController = TextEditingController();
+  final TextEditingController _roomIdController =
+      TextEditingController(); //for test
   FirebaseFirestore db = FirebaseFirestore.instance;
 
   @override
@@ -32,7 +35,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
     super.initState();
     if (widget.initialRoomId != null) {
       _roomIdController.text = widget.initialRoomId!;
-    }
+    } // for test
   }
 
   bool isValidNickname(String nickname) {
@@ -99,7 +102,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20), // for test
                 Text('テスト用'),
                 TextFormField(
                   controller: _roomIdController,
@@ -122,7 +125,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
                     String? roomId = widget.initialRoomId != null
                         ? widget.initialRoomId
                         : _roomIdController.text;
-                    // 本番は　roomId = widget.initialRoomId でOK
+                    // for test  本番は　roomId = widget.initialRoomId でOK
                     String nickname = _nicknameController.text;
                     if (_formKey.currentState!.validate()) {
                       if (roomId!.isNotEmpty) {
