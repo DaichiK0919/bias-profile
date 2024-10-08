@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:bias_profile/Pages/RoomViewPage.dart';
 import 'package:bias_profile/components/RoomEntryForm.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bias_profile/util/util.dart';
 
 class CreateandJoinRoomPage extends StatefulWidget {
   final double containerWidth;
@@ -59,8 +60,8 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
 
     try {
       // Firestoreで指定されたroomIdのドキュメントを更新し、プレイヤーを追加
-      DocumentReference roomRef = db.collection('rooms').doc(roomId);
-      DocumentSnapshot roomSnapshot = await roomRef.get();
+      DocumentReference roomRef = getRoomRef(roomId);
+      DocumentSnapshot roomSnapshot = await getRoomSnapshot(roomId);
 
       showDialog(
           context: context,
@@ -70,8 +71,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
       await Future.delayed(Duration(seconds: 2));
 
       if (roomSnapshot.exists) {
-        Map<String, dynamic> roomData =
-            roomSnapshot.data() as Map<String, dynamic>;
+        Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
         String status = roomData['status'];
 
         if (status == 'recruiting') {

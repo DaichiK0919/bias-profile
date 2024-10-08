@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
       ),
       routes: {
-        '/': (context) => const HomePage(), //参加者テスト用　必ず消す！！
+        '/': (context) => const HomePage(),
       },
     );
   }
