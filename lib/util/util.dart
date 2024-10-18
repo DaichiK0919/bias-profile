@@ -36,6 +36,21 @@ Future<int> getPlayerCount(String roomId) async {
   return players.length;
 }
 
+Stream<int> getPlayerCountStream(String roomId) {
+  return FirebaseFirestore.instance
+      .collection('rooms')
+      .doc(roomId)
+      .snapshots()
+      .map((snapshot) {
+    if (!snapshot.exists) {
+      throw Exception('Room not found');
+    }
+    List<dynamic> players =
+        (snapshot.data() as Map<String, dynamic>)['players'] ?? [];
+    return players.length;
+  });
+}
+
 Future<Map<String, dynamic>?> findPlayerByUUID(
     String roomId, String playerId) async {
   Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);

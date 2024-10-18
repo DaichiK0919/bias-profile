@@ -207,8 +207,8 @@ class _RoomViewFormState extends State<RoomViewForm> {
               ],
             ),
             if (widget.isCreator)
-              FutureBuilder<int>(
-                future: getPlayerCount(widget.roomId), // 非同期関数
+              StreamBuilder<int>(
+                stream: getPlayerCountStream(widget.roomId), // 非同期関数
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     // ローディング中の表示
