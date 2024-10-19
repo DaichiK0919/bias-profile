@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:uuid/uuid.dart';
 import 'package:bias_profile/commons/constants.dart';
 
 class RoomEntryForm extends StatefulWidget {
   final double containerWidth;
+  final String playerId;
   final Function(String) onRoomCreated;
   final Function(String, String) onRoomJoined;
   final String? initialRoomId;
@@ -14,6 +14,7 @@ class RoomEntryForm extends StatefulWidget {
   const RoomEntryForm({
     Key? key,
     required this.containerWidth,
+    required this.playerId,
     required this.onRoomCreated,
     required this.onRoomJoined,
     this.initialRoomId,
@@ -44,7 +45,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
 
   Future<DocumentReference> createRoom(String nickname) async {
     Map<String, dynamic> players = {
-      'player_id': Uuid().v4(),
+      'player_id': widget.playerId,
       'nickname': nickname,
       'ever_been_parent': false,
       'can_start_next_turn': false,

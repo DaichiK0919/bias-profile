@@ -54,7 +54,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
       'player_id': playerId,
       'nickname': nickname,
       'ever_been_parent': false,
-      'can_start_next_turn': false,
+      'can_start_next_turn': true,
       'points': 0,
     };
 
@@ -132,6 +132,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
       body: Center(
         child: RoomEntryForm(
           containerWidth: widget.containerWidth,
+          playerId: playerId,
           onRoomCreated: _onRoomCreated,
           onRoomJoined: _joinRoom,
           initialRoomId: _roomId,
