@@ -3,6 +3,7 @@ import 'package:bias_profile/commons/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
+import 'package:bias_profile/util/util.dart';
 
 class RoomViewForm extends StatefulWidget {
   final double containerWidth;
@@ -34,34 +35,9 @@ class _RoomViewFormState extends State<RoomViewForm> {
         .snapshots();
   }
 
-  DocumentReference getRoomRef(String roomId) {
-    return FirebaseFirestore.instance.collection('rooms').doc(roomId);
-  }
-
-  Future<Map<String, dynamic>> getRoomSnapshot(String roomId) async {
-    DocumentSnapshot roomSnapshot = await getRoomRef(roomId).get();
-
-    if (!roomSnapshot.exists) {
-      throw Exception('Room not found');
-    }
-    return roomSnapshot.data() as Map<String, dynamic>;
-  }
-
-  Future<Map<String, dynamic>?> findPlayerByUUID(
-      String roomId, String playerId) async {
-    Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
-
-    // プレイヤーリストを取得
-    List<dynamic> players = roomData['players'];
-
-    // UUIDで特定のプレイヤーを見つける
-    return players.firstWhere((player) => player['player_id'] == playerId,
-        orElse: () => null);
-  }
-
   Future<void> startRoom(String roomId, String playerId) async {
     DocumentReference roomRef = getRoomRef(roomId);
-    Map<String, dynamic> roomData = await getRoomSnapshot(roomId);
+    Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
     List<dynamic> players = roomData['players'];
 
     int playerIndex =
@@ -140,7 +116,11 @@ class _RoomViewFormState extends State<RoomViewForm> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '参加メンバー',
+                          '参加者',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        Text(
+                          '※最大参加人数は４名',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         StreamBuilder<DocumentSnapshot>(
@@ -198,9 +178,15 @@ class _RoomViewFormState extends State<RoomViewForm> {
                         children: [
                           Text(
                             'URL',
-                            style: Theme.of(context).textTheme.labelMedium,
+                            style: Theme.of(context).textTheme.labelLarge,
                           ),
-                          Text(url),
+                          Text(
+                            url,
+                            overflow:
+                                TextOverflow.ellipsis, // 画面外のテキストを "..." にする
+                            softWrap: false, // 改行を無効にする
+                            maxLines: 1,
+                          ), // 表示する行数を1行に設定),
                           Center(
                             child: ElevatedButton(
                               onPressed: () {
@@ -221,23 +207,44 @@ class _RoomViewFormState extends State<RoomViewForm> {
               ],
             ),
             if (widget.isCreator)
-              Padding(
-                padding: EdgeInsets.all(kPaddingMedium),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    showConfirmationDialog(
-                        context: context,
-                        title: '募集を締め切りますか？',
-                        confirmButtonText: '締め切る',
-                        onCancel: () {},
-                        onConfirm: () async {
-                          await startRoom(widget.roomId, widget.playerId);
-                        },
-                        progressDialog:
-                            ProgressDialog(titleText: 'ターンを開始する準備をしています。'));
-                  },
-                  child: Text('締め切る'),
-                ),
+              StreamBuilder<int>(
+                stream: getPlayerCountStream(widget.roomId), // 非同期関数
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    // ローディング中の表示
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    // エラーハンドリング
+                    return Text('エラーが発生しました');
+                  } else {
+                    // プレイヤーが2人以上かつ部屋の作成者の場合のみボタンを活性化
+                    bool isButtonActive =
+                        widget.isCreator && (snapshot.data ?? 0) > 1;
+
+                    return Padding(
+                      padding: EdgeInsets.all(kPaddingMedium),
+                      child: ElevatedButton(
+                        onPressed: isButtonActive
+                            ? () async {
+                                showConfirmationDialog(
+                                  context: context,
+                                  title: '募集を締め切りますか？',
+                                  confirmButtonText: '締め切る',
+                                  onCancel: () {},
+                                  onConfirm: () async {
+                                    await startRoom(
+                                        widget.roomId, widget.playerId);
+                                  },
+                                  progressDialog: ProgressDialog(
+                                      titleText: 'ターンを開始する準備をしています。'),
+                                );
+                              }
+                            : null, // 非活性にするためにnull
+                        child: Text('締め切る'),
+                      ),
+                    );
+                  }
+                },
               ),
             if (widget.isCreator)
               Padding(
