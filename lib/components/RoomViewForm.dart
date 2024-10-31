@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
+import 'package:bias_profile/util/RoomStatusMonitor.dart';
 
 class RoomViewForm extends StatefulWidget {
   final double containerWidth;
@@ -23,7 +24,7 @@ class RoomViewForm extends StatefulWidget {
   State<RoomViewForm> createState() => _RoomViewFormState();
 }
 
-class _RoomViewFormState extends State<RoomViewForm> {
+class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
   late Stream<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
 
   @override
@@ -33,6 +34,8 @@ class _RoomViewFormState extends State<RoomViewForm> {
         .collection('rooms')
         .doc(widget.roomId)
         .snapshots();
+
+    startRoomStatusMonitoring(widget.roomId, widget.isCreator);
   }
 
   Future<void> startRoom(String roomId, String playerId) async {
@@ -235,8 +238,8 @@ class _RoomViewFormState extends State<RoomViewForm> {
                                     await startRoom(
                                         widget.roomId, widget.playerId);
                                   },
-                                  progressDialog: ProgressDialog(
-                                      titleText: 'ターンを開始する準備をしています。'),
+                                  // progressDialog: ProgressDialog(
+                                  //     titleText: 'ターンを開始する準備をしています。'),
                                 );
                               }
                             : null, // 非活性にするためにnull
