@@ -22,12 +22,11 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
         _hasShownCancelMessage = true;
         showConfirmationDialog(
             context: context,
-            title: '募集がキャンセルされました',
+            title: '部屋作成者が募集をキャンセルしました。',
             onConfirm: () async {
               Navigator.popUntil(context, ModalRoute.withName('/'));
             });
-      } else if (data != null && data['status'] == 'in_progress') {
-        print('条件はクリア');
+      } else if (data != null && data['current_turn']['turn_count'] == 1) {
         showDialog(
           context: context,
           barrierDismissible: false,

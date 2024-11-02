@@ -73,7 +73,6 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
       if (roomSnapshot.exists) {
         Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
         String status = roomData['status'];
-        Future<int> playersCount = getPlayerCount(roomId);
 
         if (status == 'recruiting') {
           // プレイヤーを追加
@@ -98,7 +97,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
               ),
             ),
           );
-        } else if (await playersCount > 4 && status == 'closed') {
+        } else {
           // 参加できない場合の処理
           print('Room has already had maximum players.');
           // CircularProgressIndicatorを非表示にするためのダイアログを閉じる
@@ -108,14 +107,6 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
             SnackBar(content: Text('参加者が上限に達しており参加できませんでした')),
           );
           // 参加できない場合の処理
-        } else if (status == 'closed') {
-          print('Room was closed');
-          // CircularProgressIndicatorを非表示にするためのダイアログを閉じる
-          Navigator.of(context).pop();
-          // スナックバーを表示
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('この部屋の募集はキャンセルされました')),
-          );
         }
       } else {
         // ドキュメントが存在しない場合の処理
