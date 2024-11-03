@@ -4,8 +4,8 @@ class ConfirmationDialog extends StatelessWidget {
   final String title;
   final String cancelButtonText;
   final String confirmButtonText;
-  final VoidCallback onCancel;
-  final Future<void> Function() onConfirm;
+  final VoidCallback? onCancel;
+  final Future<void> Function()? onConfirm;
   final Widget? progressDialog;
 
   const ConfirmationDialog({
@@ -13,8 +13,8 @@ class ConfirmationDialog extends StatelessWidget {
     required this.title,
     this.cancelButtonText = '閉じる',
     this.confirmButtonText = 'OK',
-    required this.onCancel,
-    required this.onConfirm,
+    this.onCancel,
+    this.onConfirm,
     this.progressDialog,
   }) : super(key: key);
 
@@ -23,25 +23,30 @@ class ConfirmationDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(title),
       actions: <Widget>[
-        TextButton(
-          child: Text(cancelButtonText),
-          onPressed: () {
-            onCancel();
-            Navigator.of(context).pop();
-          },
-        ),
+        if (onCancel != null) // nullでない場合のみボタンを表示
+          TextButton(
+            child: Text(cancelButtonText),
+            onPressed: () {
+              onCancel?.call(); // null安全な呼び出し
+              Navigator.of(context).pop();
+            },
+          ),
         TextButton(
           child: Text(confirmButtonText),
-          onPressed: () async {
-            await onConfirm();
-            if (progressDialog != null) {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) => progressDialog!,
-              );
-            }
-          },
+          onPressed: onConfirm == null
+              ? () {
+                  Navigator.of(context).pop();
+                }
+              : () async {
+                  await onConfirm!();
+                  if (progressDialog != null) {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) => progressDialog!,
+                    );
+                  }
+                },
         ),
       ],
     );
@@ -53,8 +58,8 @@ Future<void> showConfirmationDialog({
   required String title,
   String cancelButtonText = '閉じる',
   String confirmButtonText = 'OK',
-  required VoidCallback onCancel,
-  required Future<void> Function() onConfirm,
+  VoidCallback? onCancel,
+  Future<void> Function()? onConfirm,
   Widget? progressDialog,
 }) {
   return showDialog<void>(

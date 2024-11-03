@@ -99,13 +99,14 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
           );
         } else {
           // 参加できない場合の処理
-          print('Room is not in recruiting status');
+          print('Room has already had maximum players.');
           // CircularProgressIndicatorを非表示にするためのダイアログを閉じる
           Navigator.of(context).pop();
           // スナックバーを表示
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('参加数が上限に達しており参加することができませんでした')),
+            SnackBar(content: Text('部屋に参加できませんでした')),
           );
+          // 参加できない場合の処理
         }
       } else {
         // ドキュメントが存在しない場合の処理
