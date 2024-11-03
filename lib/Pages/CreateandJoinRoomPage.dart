@@ -104,7 +104,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
           Navigator.of(context).pop();
           // スナックバーを表示
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('参加者が上限に達しており参加できませんでした')),
+            SnackBar(content: Text('部屋に参加できませんでした')),
           );
           // 参加できない場合の処理
         }
