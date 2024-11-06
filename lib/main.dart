@@ -19,8 +19,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '偏見プロフィール',
-      theme: ThemeData.from(
+      theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
+        fontFamily: 'NotoSansJP',
       ),
       routes: {
         '/': (context) => const HomePage(),
