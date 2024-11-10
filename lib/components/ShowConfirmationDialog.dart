@@ -23,11 +23,11 @@ class ConfirmationDialog extends StatelessWidget {
     return AlertDialog(
       title: Text(title),
       actions: <Widget>[
-        if (onCancel != null) // nullでない場合のみボタンを表示
+        if (onCancel != null)
           TextButton(
             child: Text(cancelButtonText),
             onPressed: () {
-              onCancel?.call(); // null安全な呼び出し
+              onCancel?.call();
               Navigator.of(context).pop();
             },
           ),
@@ -39,6 +39,7 @@ class ConfirmationDialog extends StatelessWidget {
                 }
               : () async {
                   await onConfirm!();
+                  Navigator.of(context).pop();
                   if (progressDialog != null) {
                     showDialog(
                       context: context,

@@ -37,7 +37,6 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
         );
         if (context.mounted) {
           await Future.delayed(Duration(seconds: 3));
-          Navigator.of(context).pop();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

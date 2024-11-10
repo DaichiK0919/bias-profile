@@ -39,7 +39,7 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
     startRoomStatusMonitoring(widget.roomId, widget.isCreator, widget.playerId);
   }
 
-  Future<void> startRoom(String roomId, String playerId) async {
+  Future<void> _startRoom(String roomId, String playerId) async {
     DocumentReference roomRef = getRoomRef(roomId);
     Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
     List<dynamic> players = roomData['players'];
@@ -195,31 +195,15 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                         onPressed: isButtonActive
                             ? () async {
                                 showConfirmationDialog(
-                                    context: context,
-                                    title: '募集を締め切りますか？',
-                                    confirmButtonText: '締め切る',
-                                    onCancel: () {},
-                                    onConfirm: () async {
-                                      await startRoom(
-                                          widget.roomId, widget.playerId);
-                                      if (context.mounted) {
-                                        await Future.delayed(
-                                            Duration(seconds: 3));
-                                        Navigator.of(context).pop();
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                RoomInProgressPage(
-                                              roomId: widget.roomId,
-                                              playerId: widget.playerId,
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    progressDialog: ProgressDialog(
-                                        titleText: 'ターンを開始する準備をしています。'));
+                                  context: context,
+                                  title: '募集を締め切りますか？',
+                                  confirmButtonText: '締め切る',
+                                  onCancel: () {},
+                                  onConfirm: () async {
+                                    await _startRoom(
+                                        widget.roomId, widget.playerId);
+                                  },
+                                );
                               }
                             : null, // 非活性にするためにnull
                         child: Text('締め切る'),
