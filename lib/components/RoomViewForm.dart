@@ -113,58 +113,7 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(kPaddingLarge),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '参加者',
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        Text(
-                          '※最大参加人数は４名',
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        StreamBuilder<DocumentSnapshot>(
-                            stream: _documentSnapshot,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return CircularProgressIndicator();
-                              } else {
-                                final data = snapshot.data!.data()
-                                    as Map<String, dynamic>;
-                                final players =
-                                    data['players'] as List<dynamic>;
-                                return Column(
-                                  children: players.map((player) {
-                                    return Card(
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: 36.0,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                        alignment: Alignment.centerLeft,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 16.0), // 左右に少し余裕を持たせる
-                                        child: Text(
-                                          player['nickname'],
-                                          textAlign: TextAlign
-                                              .center, // Text自体も中央揃えにする
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                );
-                              }
-                            }),
-                      ],
-                    ),
-                  ),
+                  child: PlayerList(documentSnapshot: _documentSnapshot),
                 ),
                 if (widget.isCreator)
                   Container(
