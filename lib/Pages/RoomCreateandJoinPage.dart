@@ -1,21 +1,21 @@
 import 'package:bias_profile/components/components.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
-import 'package:bias_profile/Pages/RoomViewPage.dart';
+import 'package:bias_profile/Pages/RoomRecruitingPage.dart';
 import 'package:bias_profile/components/RoomEntryForm.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bias_profile/util/util.dart';
 
-class CreateandJoinRoomPage extends StatefulWidget {
+class RoomCreateandJoinPage extends StatefulWidget {
   final double containerWidth;
 
-  const CreateandJoinRoomPage({super.key, required this.containerWidth});
+  const RoomCreateandJoinPage({super.key, required this.containerWidth});
 
   @override
-  _CreateandJoinRoomPageState createState() => _CreateandJoinRoomPageState();
+  _RoomCreateandJoinPageState createState() => _RoomCreateandJoinPageState();
 }
 
-class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
+class _RoomCreateandJoinPageState extends State<RoomCreateandJoinPage> {
   String? _roomId;
   final String playerId = Uuid().v4();
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -40,7 +40,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RoomViewPage(
+        builder: (context) => RoomRecruitingPage(
           roomId: roomId,
           playerId: playerId,
           isCreator: isCreator,
@@ -68,7 +68,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
           builder: (context) {
             return ProgressDialog(titleText: '参加申請中です・・・');
           });
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 3));
 
       if (roomSnapshot.exists) {
         Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
@@ -90,7 +90,7 @@ class _CreateandJoinRoomPageState extends State<CreateandJoinRoomPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RoomViewPage(
+              builder: (context) => RoomRecruitingPage(
                 roomId: roomId,
                 playerId: playerId,
                 isCreator: isCreator,

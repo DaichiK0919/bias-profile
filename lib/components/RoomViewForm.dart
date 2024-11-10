@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
 import 'package:bias_profile/util/RoomStatusMonitor.dart';
+import 'package:bias_profile/Pages/RoomInProgressPage.dart';
 
 class RoomViewForm extends StatefulWidget {
   final double containerWidth;
@@ -35,7 +36,7 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
         .doc(widget.roomId)
         .snapshots();
 
-    startRoomStatusMonitoring(widget.roomId, widget.isCreator);
+    startRoomStatusMonitoring(widget.roomId, widget.isCreator, widget.playerId);
   }
 
   Future<void> startRoom(String roomId, String playerId) async {
@@ -113,7 +114,22 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                   ),
-                  child: PlayerList(documentSnapshot: _documentSnapshot),
+                  child: PlayerList(
+                    documentSnapshot: _documentSnapshot,
+                    listTitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '参加者',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        Text(
+                          '※最大参加人数は４名',
+                          style: Theme.of(context).textTheme.labelMedium,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 if (widget.isCreator)
                   Container(
@@ -179,17 +195,31 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                         onPressed: isButtonActive
                             ? () async {
                                 showConfirmationDialog(
-                                  context: context,
-                                  title: '募集を締め切りますか？',
-                                  confirmButtonText: '締め切る',
-                                  onCancel: () {},
-                                  onConfirm: () async {
-                                    await startRoom(
-                                        widget.roomId, widget.playerId);
-                                  },
-                                  // progressDialog: ProgressDialog(
-                                  //     titleText: 'ターンを開始する準備をしています。'),
-                                );
+                                    context: context,
+                                    title: '募集を締め切りますか？',
+                                    confirmButtonText: '締め切る',
+                                    onCancel: () {},
+                                    onConfirm: () async {
+                                      await startRoom(
+                                          widget.roomId, widget.playerId);
+                                      if (context.mounted) {
+                                        await Future.delayed(
+                                            Duration(seconds: 3));
+                                        Navigator.of(context).pop();
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                RoomInProgressPage(
+                                              roomId: widget.roomId,
+                                              playerId: widget.playerId,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    progressDialog: ProgressDialog(
+                                        titleText: 'ターンを開始する準備をしています。'));
                               }
                             : null, // 非活性にするためにnull
                         child: Text('締め切る'),

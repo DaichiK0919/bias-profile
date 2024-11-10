@@ -4,10 +4,12 @@ import 'package:bias_profile/commons/constants.dart';
 
 class PlayerList extends StatelessWidget {
   final Stream<DocumentSnapshot<Map<String, dynamic>>> documentSnapshot;
+  final Widget listTitle;
 
   const PlayerList({
     Key? key,
     required this.documentSnapshot,
+    required this.listTitle,
   }) : super(key: key);
 
   @override
@@ -24,14 +26,7 @@ class PlayerList extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '参加者',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            Text(
-              '※最大参加人数は４名',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
+            listTitle,
             StreamBuilder<DocumentSnapshot>(
                 stream: documentSnapshot,
                 builder: (context, snapshot) {
@@ -52,9 +47,18 @@ class PlayerList extends StatelessWidget {
                             ),
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(
-                              player['nickname'],
-                              textAlign: TextAlign.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  player['nickname'],
+                                  textAlign: TextAlign.center,
+                                ),
+                                if (data['status'] != 'recruiting')
+                                  Text(player['points'].toString() + 'pt')
+                                else
+                                  SizedBox.shrink(),
+                              ],
                             ),
                           ),
                         );

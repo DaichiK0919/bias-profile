@@ -1,13 +1,14 @@
+import 'package:bias_profile/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/commons/ResponsiveLayout.dart';
 
-class RoomViewPage extends StatelessWidget {
+class RoomRecruitingPage extends StatelessWidget {
   final String roomId;
   final String playerId;
   final bool isCreator;
 
-  const RoomViewPage(
+  const RoomRecruitingPage(
       {super.key,
       required this.roomId,
       required this.playerId,

@@ -1,4 +1,4 @@
-import 'package:bias_profile/Pages/CreateandJoinRoomPage.dart';
+import 'package:bias_profile/Pages/RoomCreateandJoinPage.dart';
 import 'package:flutter/material.dart';
 import 'package:bias_profile/commons/ResponsiveLayout.dart';
 
@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
           BreakPoint(minWidth: 0, containerWidth: 300),
         ],
         builder: (context, containerWidth) {
-          return CreateandJoinRoomPage(containerWidth: containerWidth);
+          return RoomCreateandJoinPage(containerWidth: containerWidth);
         },
       ),
     );
