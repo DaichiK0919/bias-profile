@@ -4,7 +4,7 @@ import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/commons/ResponsiveLayout.dart';
 import 'package:bias_profile/util/util.dart';
 
-class RoomInProgressPage extends StatelessWidget {
+class RoomInProgressPage extends StatefulWidget {
   final String roomId;
   final String playerId;
 
@@ -15,41 +15,48 @@ class RoomInProgressPage extends StatelessWidget {
   });
 
   @override
+  State<RoomInProgressPage> createState() => _RoomInProgressPageState();
+}
+
+class _RoomInProgressPageState extends State<RoomInProgressPage> {
+  DocumentSnapshot? _documentSnapshot;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoomSnapshot();
+  }
+
+  Future<void> _loadRoomSnapshot() async {
+    _documentSnapshot = await getRoomSnapshot(widget.roomId);
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: getRoomSnapshotAsStream(roomId),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('エラーが発生しました'));
-        }
+    if (_documentSnapshot == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final documentSnapshot = snapshot.data!;
-
-        return Scaffold(
-          appBar: AppBar(
-            title: switch (documentSnapshot.get('status')) {
-              'in_progress' => Text('プレイヤー一覧'),
-              'closed' => Text('最終結果'),
-              _ => null,
-            },
-            automaticallyImplyLeading: false,
-          ),
-          body: ResponsiveLayout(
-            breakPoints: [
-              BreakPoint(minWidth: 1024, containerWidth: 500),
-              BreakPoint(minWidth: 600, containerWidth: 500),
-              BreakPoint(minWidth: 0, containerWidth: 300),
-            ],
-            builder: (context, containerWidth) {
-              return SizedBox.shrink();
-            },
-          ),
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: switch (_documentSnapshot!.get('status')) {
+          'in_progress' => Text('プレイヤー一覧'),
+          'closed' => Text('最終結果'),
+          _ => null,
+        },
+        automaticallyImplyLeading: false,
+      ),
+      body: ResponsiveLayout(
+        breakPoints: [
+          BreakPoint(minWidth: 1024, containerWidth: 500),
+          BreakPoint(minWidth: 600, containerWidth: 500),
+          BreakPoint(minWidth: 0, containerWidth: 300),
+        ],
+        builder: (context, containerWidth) {
+          return SizedBox.shrink();
+        },
+      ),
     );
   }
 }
