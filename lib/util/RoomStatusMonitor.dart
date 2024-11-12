@@ -5,18 +5,28 @@ import './util.dart';
 import 'package:bias_profile/Pages/RoomInProgressPage.dart';
 
 mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
-  Stream<DocumentSnapshot>? _roomStream;
+  late Stream<DocumentSnapshot>? _roomStream;
+  late Stream<DocumentSnapshot<Map<String, dynamic>>> _roomStreamAsMap;
   bool _hasShownCancelMessage = false;
+  int? _lastTurnCount; // 前回のターン数を保持
 
   void startRoomStatusMonitoring(
-      String roomId, bool isCreator, String playerId) {
-    _roomStream = getRoomRef(roomId).snapshots();
+    String roomId,
+    String playerId, {
+    bool isCreator = false,
+  }) {
+    _roomStream = getRoomSnapshotAsStream(roomId);
+    _roomStreamAsMap = getRoomSnapshotAsStream(roomId)
+        as Stream<DocumentSnapshot<Map<String, dynamic>>>;
 
     _roomStream?.listen((snapshot) async {
       if (!mounted) return;
-
       final data = snapshot.data() as Map<String, dynamic>?;
+
       if (data == null) return;
+
+      final currentTurn = data['current_turn'] as Map<String, dynamic>;
+      final currentTurnCount = currentTurn['turn_count'] as int;
 
       switch (data['status']) {
         case 'closed' when !isCreator && !_hasShownCancelMessage:
@@ -29,7 +39,8 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
               });
           break;
 
-        case _ when data['current_turn']['turn_count'] == 1:
+        case _
+            when _lastTurnCount != null && currentTurnCount > _lastTurnCount!:
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -43,17 +54,22 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
               builder: (context) => RoomInProgressPage(
                 roomId: roomId,
                 playerId: playerId,
+                stream: _roomStreamAsMap,
               ),
             ),
           );
           break;
       }
+
+      // 現在のターン数を保存
+      _lastTurnCount = currentTurnCount;
     });
   }
 
   @override
   void dispose() {
     _roomStream = null;
+    _lastTurnCount = null; // リセット
     super.dispose();
   }
 }

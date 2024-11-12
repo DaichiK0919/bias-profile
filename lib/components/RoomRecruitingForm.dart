@@ -5,15 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
 import 'package:bias_profile/util/RoomStatusMonitor.dart';
-import 'package:bias_profile/Pages/RoomInProgressPage.dart';
 
-class RoomViewForm extends StatefulWidget {
+class RoomRecruitingForm extends StatefulWidget {
   final double containerWidth;
   final String roomId;
   final String playerId;
   final bool isCreator;
 
-  const RoomViewForm({
+  const RoomRecruitingForm({
     super.key,
     required this.containerWidth,
     required this.roomId,
@@ -22,10 +21,11 @@ class RoomViewForm extends StatefulWidget {
   });
 
   @override
-  State<RoomViewForm> createState() => _RoomViewFormState();
+  State<RoomRecruitingForm> createState() => _RoomRecruitingFormState();
 }
 
-class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
+class _RoomRecruitingFormState extends State<RoomRecruitingForm>
+    with RoomStatusMonitor {
   late Stream<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
 
   @override
@@ -35,8 +35,8 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
         .collection('rooms')
         .doc(widget.roomId)
         .snapshots();
-
-    startRoomStatusMonitoring(widget.roomId, widget.isCreator, widget.playerId);
+    startRoomStatusMonitoring(widget.roomId, widget.playerId,
+        isCreator: widget.isCreator);
   }
 
   Future<void> _startRoom(String roomId, String playerId) async {

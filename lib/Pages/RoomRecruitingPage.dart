@@ -28,7 +28,7 @@ class RoomRecruitingPage extends StatelessWidget {
           BreakPoint(minWidth: 0, containerWidth: 300),
         ],
         builder: (context, containerWidth) {
-          return RoomViewForm(
+          return RoomRecruitingForm(
             containerWidth: containerWidth,
             roomId: roomId,
             playerId: playerId,

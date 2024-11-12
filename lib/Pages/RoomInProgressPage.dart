@@ -7,11 +7,13 @@ import 'package:bias_profile/util/util.dart';
 class RoomInProgressPage extends StatefulWidget {
   final String roomId;
   final String playerId;
+  final Stream<DocumentSnapshot<Map<String, dynamic>>> stream;
 
   const RoomInProgressPage({
     super.key,
     required this.roomId,
     required this.playerId,
+    required this.stream,
   });
 
   @override
@@ -24,6 +26,7 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
   @override
   void initState() {
     super.initState();
+
     _loadRoomSnapshot();
   }
 
@@ -54,7 +57,11 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
           BreakPoint(minWidth: 0, containerWidth: 300),
         ],
         builder: (context, containerWidth) {
-          return SizedBox.shrink();
+          return RoomInProgressForm(
+              containerWidth: containerWidth,
+              roomId: widget.roomId,
+              playerId: widget.playerId,
+              streamAsMap: widget.stream);
         },
       ),
     );
