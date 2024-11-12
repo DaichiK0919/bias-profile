@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
 import 'package:bias_profile/util/RoomStatusMonitor.dart';
+import 'package:bias_profile/Pages/ProfileInputPage.dart';
 
 class RoomInProgressForm extends StatefulWidget {
   final double containerWidth;
@@ -120,10 +121,37 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                   },
                 ),
                 ElevatedButton(
-                    onPressed: () {
-                      print('Ohayo!');
-                    },
-                    child: Text('次に進む'))
+                  onPressed: () async {
+                    final data = await getRoomSnapshotAsMap(widget.roomId);
+                    final currentTurn =
+                        data['current_turn'] as Map<String, dynamic>;
+                    final isParent =
+                        currentTurn['parent_player_id'] == widget.playerId;
+
+                    if (!mounted) return;
+                    if (isParent) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) => ProgressDialog(
+                          titleText: '子のターンです。入力が完了するまでお待ちください。',
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileInputPage(
+                            roomId: widget.roomId,
+                            playerId: widget.playerId,
+                            stream: widget.streamAsMap,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: Text('次に進む'),
+                )
               ],
             ),
           ],
