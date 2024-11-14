@@ -39,7 +39,6 @@ class ConfirmationDialog extends StatelessWidget {
                 }
               : () async {
                   await onConfirm!();
-                  Navigator.of(context).pop();
                   if (progressDialog != null) {
                     showDialog(
                       context: context,
