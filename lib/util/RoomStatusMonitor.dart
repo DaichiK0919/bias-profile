@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bias_profile/components/components.dart';
 import './util.dart';
 import 'package:bias_profile/Pages/RoomInProgressPage.dart';
+import 'package:bias_profile/commons/constants.dart';
 
 mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
   late Stream<DocumentSnapshot>? _roomStream;
@@ -47,7 +48,7 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
             builder: (BuildContext context) =>
                 ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
           );
-          await Future.delayed(Duration(seconds: 3));
+          await Future.delayed(Duration(seconds: kProcessingDuration));
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

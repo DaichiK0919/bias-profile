@@ -5,6 +5,7 @@ import 'package:bias_profile/Pages/RoomRecruitingPage.dart';
 import 'package:bias_profile/components/RoomEntryForm.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bias_profile/util/util.dart';
+import 'package:bias_profile/commons/constants.dart';
 
 class RoomCreateandJoinPage extends StatefulWidget {
   final double containerWidth;
@@ -68,7 +69,7 @@ class _RoomCreateandJoinPageState extends State<RoomCreateandJoinPage> {
           builder: (context) {
             return ProgressDialog(titleText: '参加申請中です・・・');
           });
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: kProcessingDuration));
 
       if (roomSnapshot.exists) {
         Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
