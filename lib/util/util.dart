@@ -24,6 +24,10 @@ Future<Map<String, dynamic>> getRoomSnapshotAsMap(String roomId) async {
   return roomSnapshot.data() as Map<String, dynamic>;
 }
 
+Stream<DocumentSnapshot> getRoomSnapshotAsStream(String roomId) {
+  return FirebaseFirestore.instance.collection('rooms').doc(roomId).snapshots();
+}
+
 //ドキュメント内の情報を処理する
 
 Future<int> getPlayerCount(String roomId) async {

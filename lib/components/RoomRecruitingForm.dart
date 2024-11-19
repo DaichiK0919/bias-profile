@@ -6,13 +6,13 @@ import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
 import 'package:bias_profile/util/RoomStatusMonitor.dart';
 
-class RoomViewForm extends StatefulWidget {
+class RoomRecruitingForm extends StatefulWidget {
   final double containerWidth;
   final String roomId;
   final String playerId;
   final bool isCreator;
 
-  const RoomViewForm({
+  const RoomRecruitingForm({
     super.key,
     required this.containerWidth,
     required this.roomId,
@@ -21,10 +21,11 @@ class RoomViewForm extends StatefulWidget {
   });
 
   @override
-  State<RoomViewForm> createState() => _RoomViewFormState();
+  State<RoomRecruitingForm> createState() => _RoomRecruitingFormState();
 }
 
-class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
+class _RoomRecruitingFormState extends State<RoomRecruitingForm>
+    with RoomStatusMonitor {
   late Stream<DocumentSnapshot<Map<String, dynamic>>> _documentSnapshot;
 
   @override
@@ -34,11 +35,11 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
         .collection('rooms')
         .doc(widget.roomId)
         .snapshots();
-
-    startRoomStatusMonitoring(widget.roomId, widget.isCreator);
+    startRoomStatusMonitoring(widget.roomId, widget.playerId,
+        isCreator: widget.isCreator);
   }
 
-  Future<void> startRoom(String roomId, String playerId) async {
+  Future<void> _startRoom(String roomId, String playerId) async {
     DocumentReference roomRef = getRoomRef(roomId);
     Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);
     List<dynamic> players = roomData['players'];
@@ -113,9 +114,9 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(kPaddingLarge),
-                    child: Column(
+                  child: PlayerList(
+                    documentSnapshot: _documentSnapshot,
+                    listTitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -126,42 +127,6 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                           '※最大参加人数は４名',
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
-                        StreamBuilder<DocumentSnapshot>(
-                            stream: _documentSnapshot,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return CircularProgressIndicator();
-                              } else {
-                                final data = snapshot.data!.data()
-                                    as Map<String, dynamic>;
-                                final players =
-                                    data['players'] as List<dynamic>;
-                                return Column(
-                                  children: players.map((player) {
-                                    return Card(
-                                      child: Container(
-                                        width: double.infinity,
-                                        height: 36.0,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                        alignment: Alignment.centerLeft,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 16.0), // 左右に少し余裕を持たせる
-                                        child: Text(
-                                          player['nickname'],
-                                          textAlign: TextAlign
-                                              .center, // Text自体も中央揃えにする
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                );
-                              }
-                            }),
                       ],
                     ),
                   ),
@@ -235,11 +200,9 @@ class _RoomViewFormState extends State<RoomViewForm> with RoomStatusMonitor {
                                   confirmButtonText: '締め切る',
                                   onCancel: () {},
                                   onConfirm: () async {
-                                    await startRoom(
+                                    await _startRoom(
                                         widget.roomId, widget.playerId);
                                   },
-                                  // progressDialog: ProgressDialog(
-                                  //     titleText: 'ターンを開始する準備をしています。'),
                                 );
                               }
                             : null, // 非活性にするためにnull

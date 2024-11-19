@@ -96,7 +96,7 @@ flutter:
           - asset: assets/fonts/NotoSansJP-Light.ttf
             weight: 300
           - asset: assets/fonts/NotoSansJP-ExtraLight.ttf
-            weight: 300
+            weight: 200
           - asset: assets/fonts/NotoSansJP-Thin.ttf
             weight: 100
   # For details regarding fonts from package dependencies,
