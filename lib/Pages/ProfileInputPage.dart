@@ -22,16 +22,29 @@ class ProfileInputPage extends StatefulWidget {
 
 class _ProfileInputPageState extends State<ProfileInputPage> {
   DocumentSnapshot? _documentSnapshot;
+  String? _correctCardPath;
 
   @override
   void initState() {
     super.initState();
-
     _loadRoomSnapshot();
   }
 
   Future<void> _loadRoomSnapshot() async {
     _documentSnapshot = await getRoomSnapshot(widget.roomId);
+    if (_documentSnapshot != null) {
+      final data = _documentSnapshot!.data() as Map<String, dynamic>;
+      final cards = data['character_cards'] as List<dynamic>;
+
+      // is_correct=trueのカードのパスを1つ取得
+      final correctCard = cards.firstWhere(
+        (card) => card['is_correct'] == true,
+        orElse: () => null,
+      );
+      _correctCardPath = correctCard != null
+          ? correctCard['character_card_path'] as String
+          : null;
+    }
     setState(() {});
   }
 
@@ -53,7 +66,12 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
           BreakPoint(minWidth: 0, containerWidth: 300),
         ],
         builder: (context, containerWidth) {
-          return SizedBox.shrink();
+          return ProfileInputForm(
+            containerWidth: containerWidth,
+            roomId: widget.roomId,
+            playerId: widget.playerId,
+            correctCardPath: _correctCardPath,
+          );
         },
       ),
     );

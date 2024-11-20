@@ -19,7 +19,7 @@ class PlayerList extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: kMarginLarge),
       decoration: BoxDecoration(
         color: Colors.grey,
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(12.0),
       ),
       child: Padding(
         padding: EdgeInsets.all(kPaddingLarge),

@@ -1,8 +1,10 @@
+import 'package:bias_profile/components/ProfileInputForm.dart';
 import 'package:flutter/material.dart';
 import 'Pages/HomePage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'commons/firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:bias_profile/UItest/UItest_ProfileInputForm.dart';
 
 void main() async {
   await dotenv.load(fileName: "assets/.env");
@@ -23,8 +25,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         fontFamily: 'NotoSansJP',
       ),
+      // initialRoute: '/uitest', //for test  UI検証用　遷移後のページのUI作成が難儀にしてきたので
       routes: {
         '/': (context) => const HomePage(),
+        '/uitest': (context) => const UitestProfileInputForm(),
       },
     );
   }
