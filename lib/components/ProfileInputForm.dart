@@ -56,8 +56,8 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
                     if (widget.correctCardPath != null)
                       Image.network(
                         widget.correctCardPath!,
-                        width: 195,
-                        height: 285,
+                        width: kProfileImageWidth,
+                        height: kProfileImageHeight,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return CircularProgressIndicator();
@@ -79,7 +79,7 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
               child: Form(
                 child: TextFormField(
                   keyboardType: TextInputType.multiline,
-                  maxLines: 4,
+                  maxLines: kProfileMaxLine,
                   // このお題の表示方法は要検討
                   // 入力欄の上にお題を表示させた方がいいかも
                   decoration: InputDecoration(

@@ -6,3 +6,6 @@ final double kFontSizeLarge = 28.0;
 final double kMarginLarge = 16.0;
 final double kMarginMedium = 14.0;
 final int kProcessingDuration = 3;
+final double kProfileImageWidth = 195;
+final double kProfileImageHeight = 285;
+final int kProfileMaxLine = 4;
