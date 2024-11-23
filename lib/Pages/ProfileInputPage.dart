@@ -23,6 +23,7 @@ class ProfileInputPage extends StatefulWidget {
 class _ProfileInputPageState extends State<ProfileInputPage> {
   DocumentSnapshot? _documentSnapshot;
   String? _correctCardPath;
+  List<String> _otherCardPaths = []; // falseの画像パスを保持
 
   @override
   void initState() {
@@ -44,6 +45,10 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
       _correctCardPath = correctCard != null
           ? correctCard['character_card_path'] as String
           : null;
+      _otherCardPaths = cards
+          .where((card) => card['is_correct'] == false)
+          .map((card) => card['character_card_path'] as String)
+          .toList();
     }
     setState(() {});
   }
@@ -71,6 +76,7 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
             roomId: widget.roomId,
             playerId: widget.playerId,
             correctCardPath: _correctCardPath,
+            otherCardPaths: _otherCardPaths,
           );
         },
       ),
