@@ -8,12 +8,14 @@ class ProfileInputPage extends StatefulWidget {
   final String roomId;
   final String playerId;
   final Stream<DocumentSnapshot<Map<String, dynamic>>> stream;
+  final String? correctCardPath;
 
   const ProfileInputPage({
     super.key,
     required this.roomId,
     required this.playerId,
     required this.stream,
+    required this.correctCardPath,
   });
 
   @override
@@ -22,8 +24,6 @@ class ProfileInputPage extends StatefulWidget {
 
 class _ProfileInputPageState extends State<ProfileInputPage> {
   DocumentSnapshot? _documentSnapshot;
-  String? _correctCardPath;
-  List<String> _otherCardPaths = []; // falseの画像パスを保持
 
   @override
   void initState() {
@@ -33,23 +33,6 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
 
   Future<void> _loadRoomSnapshot() async {
     _documentSnapshot = await getRoomSnapshot(widget.roomId);
-    if (_documentSnapshot != null) {
-      final data = _documentSnapshot!.data() as Map<String, dynamic>;
-      final cards = data['character_cards'] as List<dynamic>;
-
-      // is_correct=trueのカードのパスを1つ取得
-      final correctCard = cards.firstWhere(
-        (card) => card['is_correct'] == true,
-        orElse: () => null,
-      );
-      _correctCardPath = correctCard != null
-          ? correctCard['character_card_path'] as String
-          : null;
-      _otherCardPaths = cards
-          .where((card) => card['is_correct'] == false)
-          .map((card) => card['character_card_path'] as String)
-          .toList();
-    }
     setState(() {});
   }
 
@@ -75,8 +58,7 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
             containerWidth: containerWidth,
             roomId: widget.roomId,
             playerId: widget.playerId,
-            correctCardPath: _correctCardPath,
-            otherCardPaths: _otherCardPaths,
+            correctCardPath: widget.correctCardPath,
           );
         },
       ),

@@ -12,7 +12,6 @@ class ProfileInputForm extends StatefulWidget {
   final String roomId;
   final String playerId;
   final String? correctCardPath;
-  final List<String> otherCardPaths;
 
   const ProfileInputForm({
     super.key,
@@ -20,7 +19,6 @@ class ProfileInputForm extends StatefulWidget {
     required this.roomId,
     required this.playerId,
     required this.correctCardPath,
-    required this.otherCardPaths,
   });
 
   @override
@@ -28,47 +26,9 @@ class ProfileInputForm extends StatefulWidget {
 }
 
 class _ProfileInputFormState extends State<ProfileInputForm> {
-  bool _isImageLoading = true; // 画像の読み込み状態を管理
-
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _precacheAllImages();
-  }
-
-  Future<void> _precacheAllImages() async {
-    if (!mounted) return;
-
-    try {
-      // 正解の画像を事前読み込み
-      if (widget.correctCardPath != null) {
-        await precacheImage(
-          NetworkImage(widget.correctCardPath!),
-          context,
-        );
-      }
-
-      // その他の画像も事前読み込み
-      for (final path in widget.otherCardPaths) {
-        await precacheImage(
-          NetworkImage(path),
-          context,
-        );
-      }
-    } catch (e) {
-      print('Image precaching error: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isImageLoading = false;
-        });
-      }
-    }
   }
 
   Widget build(BuildContext context) {
@@ -93,17 +53,15 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
                     ),
                     SizedBox(height: 16.0),
                     if (widget.correctCardPath != null)
-                      _isImageLoading
-                          ? CircularProgressIndicator()
-                          : Image.network(
-                              widget.correctCardPath!,
-                              width: kProfileImageWidth,
-                              height: kProfileImageHeight,
-                              errorBuilder: (context, error, stackTrace) {
-                                print('Image error: $error');
-                                return Text('画像の読み込みに失敗しました');
-                              },
-                            )
+                      Image.network(
+                        widget.correctCardPath!,
+                        width: kProfileImageWidth,
+                        height: kProfileImageHeight,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('Image error: $error');
+                          return Text('画像の読み込みに失敗しました');
+                        },
+                      )
                     else
                       Text('画像が見つかりません'),
                   ],
