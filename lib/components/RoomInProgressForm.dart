@@ -177,9 +177,6 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
 
                     if (isParent) {
                       // Parentの場合は全ての画像をプリキャッシュしてダイアログを表示
-                      await _precacheAllImages();
-                      if (!mounted) return;
-
                       showDialog(
                         context: context,
                         barrierDismissible: false,
@@ -187,6 +184,10 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                           titleText: '子のターンです。入力が完了するまでお待ちください。',
                         ),
                       );
+                      _precacheAllImages().then((_) {
+                        if (!mounted) return;
+                        // プリキャッシュ完了後に何か処理が必要な場合はここに記述
+                      });
                     } else {
                       // 子の場合は正解の画像のみプリキャッシュして画面遷移
                       await _precacheCorrectImage();
