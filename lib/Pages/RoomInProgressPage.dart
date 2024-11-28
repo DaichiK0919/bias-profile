@@ -22,6 +22,8 @@ class RoomInProgressPage extends StatefulWidget {
 
 class _RoomInProgressPageState extends State<RoomInProgressPage> {
   DocumentSnapshot? _documentSnapshot;
+  String? _correctCardPath;
+  List<String> _otherCardPaths = []; // falseの画像パスを保持
 
   @override
   void initState() {
@@ -32,6 +34,23 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
 
   Future<void> _loadRoomSnapshot() async {
     _documentSnapshot = await getRoomSnapshot(widget.roomId);
+    if (_documentSnapshot != null) {
+      final data = _documentSnapshot!.data() as Map<String, dynamic>;
+      final cards = data['character_cards'] as List<dynamic>;
+
+      // is_correct=trueのカードのパスを1つ取得
+      final correctCard = cards.firstWhere(
+        (card) => card['is_correct'] == true,
+        orElse: () => null,
+      );
+      _correctCardPath = correctCard != null
+          ? correctCard['character_card_path'] as String
+          : null;
+      _otherCardPaths = cards
+          .where((card) => card['is_correct'] == false)
+          .map((card) => card['character_card_path'] as String)
+          .toList();
+    }
     setState(() {});
   }
 
@@ -58,10 +77,13 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
         ],
         builder: (context, containerWidth) {
           return RoomInProgressForm(
-              containerWidth: containerWidth,
-              roomId: widget.roomId,
-              playerId: widget.playerId,
-              streamAsMap: widget.stream);
+            containerWidth: containerWidth,
+            roomId: widget.roomId,
+            playerId: widget.playerId,
+            streamAsMap: widget.stream,
+            correctCardPath: _correctCardPath,
+            otherCardPaths: _otherCardPaths,
+          );
         },
       ),
     );
