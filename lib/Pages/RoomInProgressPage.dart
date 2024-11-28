@@ -24,6 +24,7 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
   DocumentSnapshot? _documentSnapshot;
   String? _correctCardPath;
   List<String> _otherCardPaths = []; // falseの画像パスを保持
+  String? _assignedProfileTheme;
 
   @override
   void initState() {
@@ -37,12 +38,19 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
     if (_documentSnapshot != null) {
       final data = _documentSnapshot!.data() as Map<String, dynamic>;
       final cards = data['character_cards'] as List<dynamic>;
+      final profiles = data['profiles'] as List<dynamic>;
 
       // is_correct=trueのカードのパスを1つ取得
       final correctCard = cards.firstWhere(
         (card) => card['is_correct'] == true,
         orElse: () => null,
       );
+
+      final assignedProfile = profiles.firstWhere(
+        (profile) => profile['assigned_player_id'] == widget.playerId,
+        orElse: () => null,
+      );
+
       _correctCardPath = correctCard != null
           ? correctCard['character_card_path'] as String
           : null;
@@ -50,6 +58,10 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
           .where((card) => card['is_correct'] == false)
           .map((card) => card['character_card_path'] as String)
           .toList();
+
+      _assignedProfileTheme = assignedProfile != null
+          ? assignedProfile['profile_theme'] as String
+          : null;
     }
     setState(() {});
   }
@@ -83,6 +95,7 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
             streamAsMap: widget.stream,
             correctCardPath: _correctCardPath,
             otherCardPaths: _otherCardPaths,
+            assignedProfileTheme: _assignedProfileTheme,
           );
         },
       ),

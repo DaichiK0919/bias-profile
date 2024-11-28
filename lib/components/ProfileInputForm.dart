@@ -12,6 +12,7 @@ class ProfileInputForm extends StatefulWidget {
   final String roomId;
   final String playerId;
   final String? correctCardPath;
+  final String? assignedProfileTheme;
 
   const ProfileInputForm({
     super.key,
@@ -19,6 +20,7 @@ class ProfileInputForm extends StatefulWidget {
     required this.roomId,
     required this.playerId,
     required this.correctCardPath,
+    required this.assignedProfileTheme,
   });
 
   @override
@@ -74,7 +76,10 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ここにお題を表示'),
+                  Text(
+                    widget.assignedProfileTheme!,
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   Form(
                     child: TextFormField(
                       keyboardType: TextInputType.multiline,

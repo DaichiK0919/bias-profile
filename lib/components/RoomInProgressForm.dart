@@ -14,6 +14,7 @@ class RoomInProgressForm extends StatefulWidget {
   final Stream<DocumentSnapshot<Map<String, dynamic>>> streamAsMap;
   final String? correctCardPath;
   final List<String> otherCardPaths;
+  final String? assignedProfileTheme;
 
   const RoomInProgressForm({
     super.key,
@@ -23,6 +24,7 @@ class RoomInProgressForm extends StatefulWidget {
     required this.streamAsMap,
     required this.correctCardPath,
     required this.otherCardPaths,
+    required this.assignedProfileTheme,
   });
 
   @override
@@ -31,8 +33,6 @@ class RoomInProgressForm extends StatefulWidget {
 
 class _RoomInProgressFormState extends State<RoomInProgressForm>
     with RoomStatusMonitor {
-  bool _isImageLoading = true;
-
   @override
   void initState() {
     super.initState();
@@ -201,6 +201,7 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                             playerId: widget.playerId,
                             stream: widget.streamAsMap,
                             correctCardPath: widget.correctCardPath,
+                            assignedProfileTheme: widget.assignedProfileTheme,
                           ),
                         ),
                       );
