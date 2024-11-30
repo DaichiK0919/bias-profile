@@ -12,6 +12,7 @@ class ProfileInputForm extends StatefulWidget {
   final String roomId;
   final String playerId;
   final String? correctCardPath;
+  final List<String> otherCardPaths;
 
   const ProfileInputForm({
     super.key,
@@ -19,6 +20,7 @@ class ProfileInputForm extends StatefulWidget {
     required this.roomId,
     required this.playerId,
     required this.correctCardPath,
+    this.otherCardPaths = const [],
   });
 
   @override
@@ -26,9 +28,25 @@ class ProfileInputForm extends StatefulWidget {
 }
 
 class _ProfileInputFormState extends State<ProfileInputForm> {
+  bool _hasPrecached = false; // didChangeDependencies での重複実行を防ぐためのフラグ
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasPrecached) {
+      // 他の画像を非同期でプリキャッシュ
+      for (final path in widget.otherCardPaths) {
+        precacheImage(
+          NetworkImage(path),
+          context,
+        ).then((_) {
+          print('Precached other image: $path');
+        }).catchError((e) {
+          print('Other image precaching error: $e');
+        });
+      }
+      _hasPrecached = true;
+    }
   }
 
   Widget build(BuildContext context) {
@@ -57,6 +75,14 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
                         widget.correctCardPath!,
                         width: kProfileImageWidth,
                         height: kProfileImageHeight,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
                         errorBuilder: (context, error, stackTrace) {
                           print('Image error: $error');
                           return Text('画像の読み込みに失敗しました');

@@ -62,22 +62,6 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
     }
   }
 
-  // 正解の画像のみプリキャッシュする関数
-  Future<void> _precacheCorrectImage() async {
-    if (!mounted) return;
-
-    try {
-      if (widget.correctCardPath != null) {
-        await precacheImage(
-          NetworkImage(widget.correctCardPath!),
-          context,
-        );
-      }
-    } catch (e) {
-      print('Image precaching error: $e');
-    }
-  }
-
   Widget build(BuildContext context) {
     return Center(
       child: Container(
@@ -189,10 +173,6 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                         // プリキャッシュ完了後に何か処理が必要な場合はここに記述
                       });
                     } else {
-                      // 子の場合は正解の画像のみプリキャッシュして画面遷移
-                      await _precacheCorrectImage();
-                      if (!mounted) return;
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -201,6 +181,7 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                             playerId: widget.playerId,
                             stream: widget.streamAsMap,
                             correctCardPath: widget.correctCardPath,
+                            otherCardPaths: widget.otherCardPaths,
                           ),
                         ),
                       );
