@@ -12,6 +12,8 @@ class RoomInProgressForm extends StatefulWidget {
   final String roomId;
   final String playerId;
   final Stream<DocumentSnapshot<Map<String, dynamic>>> streamAsMap;
+  final String? correctCardPath;
+  final List<String> otherCardPaths;
 
   const RoomInProgressForm({
     super.key,
@@ -19,6 +21,8 @@ class RoomInProgressForm extends StatefulWidget {
     required this.roomId,
     required this.playerId,
     required this.streamAsMap,
+    required this.correctCardPath,
+    required this.otherCardPaths,
   });
 
   @override
@@ -27,10 +31,35 @@ class RoomInProgressForm extends StatefulWidget {
 
 class _RoomInProgressFormState extends State<RoomInProgressForm>
     with RoomStatusMonitor {
+  bool _isImageLoading = true;
+
   @override
   void initState() {
     super.initState();
     startRoomStatusMonitoring(widget.roomId, widget.playerId);
+  }
+
+  // 全ての画像をプリキャッシュする関数
+  Future<void> _precacheAllImages() async {
+    if (!mounted) return;
+
+    try {
+      if (widget.correctCardPath != null) {
+        await precacheImage(
+          NetworkImage(widget.correctCardPath!),
+          context,
+        );
+      }
+
+      for (final path in widget.otherCardPaths) {
+        await precacheImage(
+          NetworkImage(path),
+          context,
+        );
+      }
+    } catch (e) {
+      print('Image precaching error: $e');
+    }
   }
 
   Widget build(BuildContext context) {
@@ -129,7 +158,9 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                         currentTurn['parent_player_id'] == widget.playerId;
 
                     if (!mounted) return;
+
                     if (isParent) {
+                      // Parentの場合は全ての画像をプリキャッシュしてダイアログを表示
                       showDialog(
                         context: context,
                         barrierDismissible: false,
@@ -137,6 +168,10 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                           titleText: '子のターンです。入力が完了するまでお待ちください。',
                         ),
                       );
+                      _precacheAllImages().then((_) {
+                        if (!mounted) return;
+                        // プリキャッシュ完了後に何か処理が必要な場合はここに記述
+                      });
                     } else {
                       Navigator.push(
                         context,
@@ -145,6 +180,8 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                             roomId: widget.roomId,
                             playerId: widget.playerId,
                             stream: widget.streamAsMap,
+                            correctCardPath: widget.correctCardPath,
+                            otherCardPaths: widget.otherCardPaths,
                           ),
                         ),
                       );

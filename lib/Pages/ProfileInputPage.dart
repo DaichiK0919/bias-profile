@@ -8,12 +8,16 @@ class ProfileInputPage extends StatefulWidget {
   final String roomId;
   final String playerId;
   final Stream<DocumentSnapshot<Map<String, dynamic>>> stream;
+  final String? correctCardPath;
+  final List<String> otherCardPaths;
 
   const ProfileInputPage({
     super.key,
     required this.roomId,
     required this.playerId,
     required this.stream,
+    required this.correctCardPath,
+    required this.otherCardPaths,
   });
 
   @override
@@ -26,7 +30,6 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
   @override
   void initState() {
     super.initState();
-
     _loadRoomSnapshot();
   }
 
@@ -53,7 +56,13 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
           BreakPoint(minWidth: 0, containerWidth: 300),
         ],
         builder: (context, containerWidth) {
-          return SizedBox.shrink();
+          return ProfileInputForm(
+            containerWidth: containerWidth,
+            roomId: widget.roomId,
+            playerId: widget.playerId,
+            correctCardPath: widget.correctCardPath,
+            otherCardPaths: widget.otherCardPaths,
+          );
         },
       ),
     );
