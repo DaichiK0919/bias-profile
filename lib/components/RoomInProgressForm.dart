@@ -33,6 +33,8 @@ class RoomInProgressForm extends StatefulWidget {
 
 class _RoomInProgressFormState extends State<RoomInProgressForm>
     with RoomStatusMonitor {
+  bool _isImageLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -54,22 +56,6 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
       for (final path in widget.otherCardPaths) {
         await precacheImage(
           NetworkImage(path),
-          context,
-        );
-      }
-    } catch (e) {
-      print('Image precaching error: $e');
-    }
-  }
-
-  // 正解の画像のみプリキャッシュする関数
-  Future<void> _precacheCorrectImage() async {
-    if (!mounted) return;
-
-    try {
-      if (widget.correctCardPath != null) {
-        await precacheImage(
-          NetworkImage(widget.correctCardPath!),
           context,
         );
       }
@@ -200,7 +186,8 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                             roomId: widget.roomId,
                             playerId: widget.playerId,
                             stream: widget.streamAsMap,
-                            correctCardPath: widget.correctCardPath,
+                            correctCardPath: widget.correctCardPath,                            
+                            otherCardPaths: widget.otherCardPaths,
                             assignedProfileTheme: widget.assignedProfileTheme,
                           ),
                         ),

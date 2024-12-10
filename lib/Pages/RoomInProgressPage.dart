@@ -39,18 +39,22 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
       final data = _documentSnapshot!.data() as Map<String, dynamic>;
       final cards = data['character_cards'] as List<dynamic>;
       final profiles = data['profiles'] as List<dynamic>;
+      
+      final assignedProfile = profiles.firstWhere(
+        (profile) => profile['assigned_player_id'] == widget.playerId,
+        orElse: () => null,
+      );
+      
+      _assignedProfileTheme = assignedProfile != null
+          ? assignedProfile['profile_theme'] as String
+          : null;
 
       // is_correct=trueのカードのパスを1つ取得
       final correctCard = cards.firstWhere(
         (card) => card['is_correct'] == true,
         orElse: () => null,
       );
-
-      final assignedProfile = profiles.firstWhere(
-        (profile) => profile['assigned_player_id'] == widget.playerId,
-        orElse: () => null,
-      );
-
+      
       _correctCardPath = correctCard != null
           ? correctCard['character_card_path'] as String
           : null;
@@ -58,10 +62,6 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
           .where((card) => card['is_correct'] == false)
           .map((card) => card['character_card_path'] as String)
           .toList();
-
-      _assignedProfileTheme = assignedProfile != null
-          ? assignedProfile['profile_theme'] as String
-          : null;
     }
     setState(() {});
   }
