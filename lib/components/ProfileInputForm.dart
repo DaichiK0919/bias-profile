@@ -13,6 +13,7 @@ class ProfileInputForm extends StatefulWidget {
   final String playerId;
   final String? correctCardPath;
   final List<String> otherCardPaths;
+  final String? assignedProfileTheme;
 
   const ProfileInputForm({
     super.key,
@@ -21,6 +22,7 @@ class ProfileInputForm extends StatefulWidget {
     required this.playerId,
     required this.correctCardPath,
     this.otherCardPaths = const [],
+    required this.assignedProfileTheme,
   });
 
   @override
@@ -28,6 +30,7 @@ class ProfileInputForm extends StatefulWidget {
 }
 
 class _ProfileInputFormState extends State<ProfileInputForm> {
+
   bool _hasPrecached = false; // didChangeDependencies での重複実行を防ぐためのフラグ
 
   @override
@@ -100,7 +103,10 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ここにお題を表示'),
+                  Text(
+                    widget.assignedProfileTheme!,
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   Form(
                     child: TextFormField(
                       keyboardType: TextInputType.multiline,

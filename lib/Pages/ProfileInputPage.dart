@@ -10,7 +10,8 @@ class ProfileInputPage extends StatefulWidget {
   final Stream<DocumentSnapshot<Map<String, dynamic>>> stream;
   final String? correctCardPath;
   final List<String> otherCardPaths;
-
+  final String? assignedProfileTheme;
+  
   const ProfileInputPage({
     super.key,
     required this.roomId,
@@ -18,6 +19,7 @@ class ProfileInputPage extends StatefulWidget {
     required this.stream,
     required this.correctCardPath,
     required this.otherCardPaths,
+    required this.assignedProfileTheme,
   });
 
   @override
@@ -62,6 +64,7 @@ class _ProfileInputPageState extends State<ProfileInputPage> {
             playerId: widget.playerId,
             correctCardPath: widget.correctCardPath,
             otherCardPaths: widget.otherCardPaths,
+            assignedProfileTheme: widget.assignedProfileTheme,
           );
         },
       ),
