@@ -30,10 +30,15 @@ class ProfileInputForm extends StatefulWidget {
 }
 
 class _ProfileInputFormState extends State<ProfileInputForm> {
-
   bool _hasPrecached = false; // didChangeDependencies での重複実行を防ぐためのフラグ
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _profileController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_hasPrecached) {
@@ -50,6 +55,10 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
       }
       _hasPrecached = true;
     }
+  }
+
+  bool isValidProfile(String profile) {
+    return profile.isNotEmpty && profile.length <= 100;
   }
 
   Widget build(BuildContext context) {
@@ -108,7 +117,15 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   Form(
+                    key: _formKey,
                     child: TextFormField(
+                      validator: (value) {
+                        if (!isValidProfile(value!)) {
+                          return '1〜100文字で入力してください';
+                        }
+                        return null;
+                      },
+                      controller: _profileController,
                       keyboardType: TextInputType.multiline,
                       maxLines: kProfileMaxLine,
                       decoration: InputDecoration(
@@ -121,7 +138,11 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
             ),
             ElevatedButton(
               onPressed: () {
-                print('入力完了');
+                if (_formKey.currentState!.validate()) {
+                  print('入力完了');
+                } else {
+                  print('入力失敗');
+                }
               },
               child: Text('入力完了'),
             ),
