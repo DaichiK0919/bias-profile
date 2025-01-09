@@ -29,7 +29,8 @@ class ProfileInputForm extends StatefulWidget {
   State<ProfileInputForm> createState() => _ProfileInputFormState();
 }
 
-class _ProfileInputFormState extends State<ProfileInputForm> {
+class _ProfileInputFormState extends State<ProfileInputForm>
+    with RoomStatusMonitor {
   bool _hasPrecached = false; // didChangeDependencies での重複実行を防ぐためのフラグ
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _profileController = TextEditingController();
@@ -137,9 +138,50 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  print('入力完了');
+                  try {
+                    // まず現在のデータを取得
+                    final roomData = await getRoomSnapshotAsMap(widget.roomId);
+
+                    // current_turnフィールドからprofileリストを取得
+                    final currentTurn =
+                        roomData['current_turn'] as Map<String, dynamic>;
+                    final profiles = List<Map<String, dynamic>>.from(
+                        currentTurn['profiles']);
+
+                    // assigned_player_idが一致するプロフィールを更新
+                    final profileIndex = profiles.indexWhere((profile) =>
+                        profile['assigned_player_id'] == widget.playerId);
+
+                    if (profileIndex != -1) {
+                      profiles[profileIndex]['input_profile'] =
+                          _profileController.text;
+
+                      // 更新したデータをセット
+                      await getRoomRef(widget.roomId).update({
+                        'current_turn': {'profiles': profiles}
+                      });
+
+                      final stillWaiting = profiles
+                          .any((profile) => profile['input_profile'] == null);
+                      if (stillWaiting) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) => ProgressDialog(
+                            titleText: '他の子が入力中です...',
+                          ),
+                        );
+                      }
+                      print('入力完了: ${_profileController.text}');
+                    } else {
+                      print(
+                          'Assigned profile not found for player: ${widget.playerId}');
+                    }
+                  } catch (e) {
+                    print('Firestore保存エラー: $e');
+                  }
                 } else {
                   print('入力失敗');
                 }
