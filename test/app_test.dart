@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bias_profile/commons/firebase_options.dart';
 import 'package:bias_profile/main.dart' as app;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -11,8 +12,6 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Room Creation and Join Flow Test', () {
-    String? roomId;
-
     setUpAll(() async {
       await dotenv.load(fileName: "assets/.env");
       await Firebase.initializeApp(
@@ -21,47 +20,74 @@ void main() {
     });
 
     testWidgets('Create room and verify initial room state', (tester) async {
-      // アプリの起動
+      // アプリ起動
       app.main();
-      await tester.pumpUntilFound(find.text('部屋を作る'));
+      await tester.pumpAndSettle();
 
-      // ニックネームを入力
-      final nicknameField = find.byType(TextField).first;
-      await tester.enterText(nicknameField, 'HostUser');
+      // 部屋作成
+      final hostNicknameField = find.byType(TextField).first;
+      await tester.enterText(hostNicknameField, 'HostPlayer');
+      await tester.pumpAndSettle();
 
-      // 部屋を作るボタンをタップ
-      await tester.tap(find.text('部屋を作る'));
-      await tester.pumpUntilFound(find.text('https://bias-profile.web.app/?room_id='));
+      final createRoomButton = find.text('部屋を作る');
+      expect(createRoomButton, findsOneWidget);
+      await tester.tap(createRoomButton);
+      await tester.pumpAndSettle();
 
-      // 画面に表示されているURLテキストを取得
-      final urlWidget = find.byType(SelectableText).evaluate().first.widget as SelectableText;
-      final urlText = urlWidget.data!;
+      // 部屋作成確認
+      await tester.pumpUntilFound(find.text('参加募集中'));
+      expect(find.text('HostPlayer'), findsOneWidget);
 
-      // URLから部屋IDを抽出
-      final uri = Uri.parse(urlText);
-      roomId = uri.queryParameters['room_id'];
-
-      // 部屋IDが取得できたことを確認
+      // 画面に表示されているURLから部屋IDを取得
+      final urlText = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).firstWhere(
+            (text) => text?.contains('bias-profile.web.app/?room_id=') ?? false,
+        orElse: () => null,
+      );
+      expect(urlText, isNotNull);
+      final roomId = Uri.parse(urlText!).queryParameters['room_id'];
       expect(roomId, isNotNull);
-      expect(roomId!.isNotEmpty, true);
-    });
 
-    testWidgets('First player joins the room', (tester) async {
-      app.main();
-      await tester.pumpUntilFound(find.text('部屋を作る'));
+      // 参加者を擬似的に追加
+      await FirebaseFirestore.instance.collection('rooms').doc(roomId).update({
+        'players': FieldValue.arrayUnion([
+          {
+            'player_id': 'player2_id',
+            'nickname': 'Player2',
+            'ever_been_parent': false,
+            'can_start_next_turn': true,
+            'points': 0,
+          }
+        ])
+      });
+      await tester.pumpAndSettle();
 
-      final nicknameField = find.byType(TextField).first;
-      await tester.enterText(nicknameField, 'Player1');
+      // リストにプレイヤーが追加されたことを確認
+      expect(find.text('Player2'), findsOneWidget);
 
-      final roomIdField = find.byType(TextField).at(1);
-      await tester.enterText(roomIdField, roomId!);
-
-      // 部屋に参加
-      await tester.tap(find.text('部屋を作る'));
-
-      // 参加後の画面表示を確認
-      await tester.pumpUntilFound(find.text('Player1'));
-      expect(find.text('HostUser'), findsOneWidget);
+      // 募集締切
+      final closeRecruitmentButton = find.text('締め切る');
+      expect(closeRecruitmentButton, findsOneWidget);
+      await tester.tap(closeRecruitmentButton);
+      await tester.pumpAndSettle();
+      final confirmButton = find.text('締め切る').last;
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+      await tester.pumpUntilFound(find.text('プレイヤー一覧'));
+      expect(
+          find.descendant(
+              of: find.byType(Card),
+              matching: find.text('HostPlayer')
+          ),
+          findsOneWidget
+      );
+      expect(
+          find.descendant(
+              of: find.byType(Card),
+              matching: find.text('Player2')
+          ),
+          findsOneWidget
+      );
+      expect(find.text('0pt'), findsWidgets);
     });
 
   });
@@ -76,7 +102,6 @@ extension TestUtilEx on WidgetTester {
       }) async {
     bool found = false;
     final startTime = DateTime.now();
-
     while (!found) {
       // タイムアウトチェック
       if (DateTime.now().difference(startTime) > timeout) {
@@ -84,7 +109,6 @@ extension TestUtilEx on WidgetTester {
           'Pump until has timed out while looking for ${finder.description}. $description',
         );
       }
-
       try {
         await pumpAndSettle(pumpInterval);
         found = any(finder);
@@ -93,7 +117,6 @@ extension TestUtilEx on WidgetTester {
         await pump(pumpInterval);
         found = any(finder);
       }
-
       // 短い待機を入れてCPU負荷を下げる
       await Future.delayed(const Duration(milliseconds: 50));
     }
