@@ -11,7 +11,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('Room Creation and Join Flow Test', () {
+  group('Room Flow Tests', () {
     setUpAll(() async {
       await dotenv.load(fileName: "assets/.env");
       await Firebase.initializeApp(
@@ -19,40 +19,46 @@ void main() {
       );
     });
 
-    testWidgets('Create room and verify initial room state', (tester) async {
-      // アプリ起動
+    testWidgets('Test Case 1: Room Creation -> Join -> Cancel Join', (tester) async {
+      String? roomId;
+
+      // 1-a-i: アプリ起動 (部屋作成者視点)
       app.main();
       await tester.pumpAndSettle();
 
-      // 部屋作成
+      // 1-a-iv: ニックネームバリデーション
+      final createRoomButton = find.text('部屋を作る');
+      await tester.tap(createRoomButton);
+      await tester.pumpAndSettle();
+      expect(find.text('ニックネームを入力してください'), findsOneWidget);
+
+      // 1-a-ii: 部屋作成
       final hostNicknameField = find.byType(TextField).first;
       await tester.enterText(hostNicknameField, 'HostPlayer');
       await tester.pumpAndSettle();
-
-      final createRoomButton = find.text('部屋を作る');
-      expect(createRoomButton, findsOneWidget);
       await tester.tap(createRoomButton);
       await tester.pumpAndSettle();
 
-      // 部屋作成確認
+      // 1-a-iii: 参加募集中画面の確認
       await tester.pumpUntilFound(find.text('参加募集中'));
       expect(find.text('HostPlayer'), findsOneWidget);
+      expect(find.text('参加者'), findsOneWidget);
 
-      // 画面に表示されているURLから部屋IDを取得
+      // URLの取得
       final urlText = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).firstWhere(
             (text) => text?.contains('bias-profile.web.app/?room_id=') ?? false,
         orElse: () => null,
       );
       expect(urlText, isNotNull);
-      final roomId = Uri.parse(urlText!).queryParameters['room_id'];
+      roomId = Uri.parse(urlText!).queryParameters['room_id'];
       expect(roomId, isNotNull);
 
-      // 参加者を擬似的に追加
+      // 1-b-i & 1-b-ii: 参加者を追加してシミュレート
       await FirebaseFirestore.instance.collection('rooms').doc(roomId).update({
         'players': FieldValue.arrayUnion([
           {
             'player_id': 'player2_id',
-            'nickname': 'Player2',
+            'nickname': 'JoinPlayer',
             'ever_been_parent': false,
             'can_start_next_turn': true,
             'points': 0,
@@ -61,35 +67,83 @@ void main() {
       });
       await tester.pumpAndSettle();
 
-      // リストにプレイヤーが追加されたことを確認
-      expect(find.text('Player2'), findsOneWidget);
+      // プレイヤーリストの更新を確認
+      expect(find.text('JoinPlayer'), findsOneWidget);
 
-      // 募集締切
-      final closeRecruitmentButton = find.text('締め切る');
-      expect(closeRecruitmentButton, findsOneWidget);
-      await tester.tap(closeRecruitmentButton);
+      // 1-c-ii: 参加者のキャンセルをシミュレート
+      await FirebaseFirestore.instance.collection('rooms').doc(roomId).update({
+        'players': FieldValue.arrayRemove([
+          {
+            'player_id': 'player2_id',
+            'nickname': 'JoinPlayer',
+            'ever_been_parent': false,
+            'can_start_next_turn': true,
+            'points': 0,
+          }
+        ])
+      });
       await tester.pumpAndSettle();
-      final confirmButton = find.text('締め切る').last;
-      await tester.tap(confirmButton);
-      await tester.pumpAndSettle();
-      await tester.pumpUntilFound(find.text('プレイヤー一覧'));
-      expect(
-          find.descendant(
-              of: find.byType(Card),
-              matching: find.text('HostPlayer')
-          ),
-          findsOneWidget
-      );
-      expect(
-          find.descendant(
-              of: find.byType(Card),
-              matching: find.text('Player2')
-          ),
-          findsOneWidget
-      );
-      expect(find.text('0pt'), findsWidgets);
+
+      // プレイヤーリストから参加者が削除されたことを確認
+      expect(find.text('JoinPlayer'), findsNothing);
     });
 
+    testWidgets('Test Case 2: Room Creation -> Join -> Cancel Recruitment', (tester) async {
+      String? roomId;
+
+      // 部屋の作成
+      app.main();
+      await tester.pumpAndSettle();
+
+      final hostNicknameField = find.byType(TextField).first;
+      await tester.enterText(hostNicknameField, 'HostPlayer');
+      await tester.pumpAndSettle();
+
+      final createRoomButton = find.text('部屋を作る');
+      await tester.tap(createRoomButton);
+      await tester.pumpAndSettle();
+
+      // URLの取得
+      await tester.pumpUntilFound(find.text('参加募集中'));
+      final urlText = find.byType(Text).evaluate().map((e) => (e.widget as Text).data).firstWhere(
+            (text) => text?.contains('bias-profile.web.app/?room_id=') ?? false,
+        orElse: () => null,
+      );
+      roomId = Uri.parse(urlText!).queryParameters['room_id'];
+      expect(roomId, isNotNull);
+
+      // 参加者を追加
+      await FirebaseFirestore.instance.collection('rooms').doc(roomId).update({
+        'players': FieldValue.arrayUnion([
+          {
+            'player_id': 'player2_id',
+            'nickname': 'JoinPlayer',
+            'ever_been_parent': false,
+            'can_start_next_turn': true,
+            'points': 0,
+          }
+        ])
+      });
+      await tester.pumpAndSettle();
+
+      // 1-c-i: 募集のキャンセル
+      final cancelButton = find.text('キャンセル');
+      expect(cancelButton, findsOneWidget);
+      await tester.tap(cancelButton);
+      await tester.pumpAndSettle();
+
+      final confirmButton = find.text('OK');
+      expect(confirmButton, findsOneWidget);
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+
+      // キャンセル完了の確認
+      final snapshot = await FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(roomId)
+          .get();
+      expect(snapshot.data()?['status'], 'closed');
+    });
   });
 }
 
@@ -103,7 +157,6 @@ extension TestUtilEx on WidgetTester {
     bool found = false;
     final startTime = DateTime.now();
     while (!found) {
-      // タイムアウトチェック
       if (DateTime.now().difference(startTime) > timeout) {
         throw TimeoutException(
           'Pump until has timed out while looking for ${finder.description}. $description',
@@ -113,11 +166,9 @@ extension TestUtilEx on WidgetTester {
         await pumpAndSettle(pumpInterval);
         found = any(finder);
       } catch (e) {
-        // pumpAndSettleが失敗した場合（アニメーションが継続している場合など）
         await pump(pumpInterval);
         found = any(finder);
       }
-      // 短い待機を入れてCPU負荷を下げる
       await Future.delayed(const Duration(milliseconds: 50));
     }
   }
