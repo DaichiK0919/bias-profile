@@ -36,39 +36,28 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
   Future<void> _loadRoomSnapshot() async {
     _documentSnapshot = await getRoomSnapshot(widget.roomId);
     if (_documentSnapshot != null) {
-      final roomData = _documentSnapshot!.data() as Map<String, dynamic>;
-
-      // current_turnフィールドからcharcter_cardsとprofileリストを取得
-      final currentTurn = roomData['current_turn'] as Map<String, dynamic>;
-
-      final cards =
-          List<Map<String, dynamic>>.from(currentTurn['character_cards']);
-      final profiles = List<Map<String, dynamic>>.from(currentTurn['profiles']);
-
+      final data = _documentSnapshot!.data() as Map<String, dynamic>;
+      final cards = data['character_cards'] as List<dynamic>;
+      final profiles = data['profiles'] as List<dynamic>;
+      
       final assignedProfile = profiles.firstWhere(
         (profile) => profile['assigned_player_id'] == widget.playerId,
-        orElse: () => {
-          'profile_theme': null,
-          'assigned_player_id': null,
-          'input_profile': null
-        },
+        orElse: () => null,
       );
-
-      _assignedProfileTheme =
-          assignedProfile != null && assignedProfile['profile_theme'] != null
-              ? assignedProfile['profile_theme'] as String
-              : null;
+      
+      _assignedProfileTheme = assignedProfile != null
+          ? assignedProfile['profile_theme'] as String
+          : null;
 
       // is_correct=trueのカードのパスを1つ取得
       final correctCard = cards.firstWhere(
         (card) => card['is_correct'] == true,
-        orElse: () => {'character_card_path': null, 'is_correct': false},
+        orElse: () => null,
       );
-
-      _correctCardPath =
-          correctCard != null && correctCard['character_card_path'] != null
-              ? correctCard['character_card_path'] as String
-              : null;
+      
+      _correctCardPath = correctCard != null
+          ? correctCard['character_card_path'] as String
+          : null;
       _otherCardPaths = cards
           .where((card) => card['is_correct'] == false)
           .map((card) => card['character_card_path'] as String)
