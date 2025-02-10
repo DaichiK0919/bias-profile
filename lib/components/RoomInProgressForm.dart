@@ -114,10 +114,11 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                     final currentTurn =
                         data['current_turn'] as Map<String, dynamic>;
                     final parentPlayerId =
-                        currentTurn['parent_player_id'] as String;
+                        currentTurn['parent_player_id'] as String?;
+                    if (parentPlayerId == null) return Container();
 
                     return FutureBuilder<Map<String, dynamic>?>(
-                      future: findPlayerByUUID(widget.roomId, parentPlayerId),
+                      future: findPlayerByUUID(widget.roomId, parentPlayerId!),
                       builder: (context, playerSnapshot) {
                         if (!playerSnapshot.hasData) {
                           return CircularProgressIndicator();
