@@ -32,6 +32,7 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
 
       switch (data['status']) {
         case 'closed' when !isCreator && !_hasShownCancelMessage:
+          print('部屋のステータスが closed になったのを検知');
           _hasShownCancelMessage = true;
           showConfirmationDialog(
               context: context,
@@ -43,6 +44,9 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
 
         case _
             when _lastTurnCount != null && currentTurnCount > _lastTurnCount!:
+          print('lastTurnCount:$_lastTurnCount');
+          print('currentTurnCount:$currentTurnCount');
+          print('ターン数の増加を検知');
           showDialog(
             context: context,
             barrierDismissible: false,
@@ -63,7 +67,9 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
           break;
 
         // プロフィール入力の監視を追加
-        case _ when currentTurn['profiles'] != null:
+        case _
+            when currentTurn['profiles'] != null &&
+                currentTurn['parent_answer'] == null:
           final profiles =
               List<Map<String, dynamic>>.from(currentTurn['profiles']);
 
@@ -99,6 +105,7 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
 
       // 現在のターン数を保存
       _lastTurnCount = currentTurnCount;
+      print('保存されたlastTurnCount:$_lastTurnCount');
     });
   }
 

@@ -159,9 +159,8 @@ class _ProfileInputFormState extends State<ProfileInputForm>
                           _profileController.text;
 
                       // 更新したデータをセット
-                      await getRoomRef(widget.roomId).update({
-                        'current_turn': {'profiles': profiles}
-                      });
+                      await getRoomRef(widget.roomId)
+                          .update({'current_turn.profiles': profiles});
 
                       final stillWaiting = profiles
                           .any((profile) => profile['input_profile'] == null);
