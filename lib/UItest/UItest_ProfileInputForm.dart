@@ -15,13 +15,13 @@ class UitestProfileInputForm extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                margin: EdgeInsets.fromLTRB(0, kMarginMedium, 0, kMarginMedium),
+                margin: EdgeInsets.fromLTRB(0, AppDimensions.marginMedium, 0, AppDimensions.marginMedium),
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: AppColors.tertiary,
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(kPaddingLarge),
+                  padding: EdgeInsets.all(AppDimensions.paddingLarge),
                   child: Column(
                     children: [
                       Text(
@@ -36,7 +36,7 @@ class UitestProfileInputForm extends StatelessWidget {
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(
-                    kMarginLarge, kMarginMedium, kMarginLarge, kPaddingLarge),
+                    AppDimensions.marginLarge, AppDimensions.marginMedium, AppDimensions.marginLarge, AppDimensions.paddingLarge),
                 child: Form(
                   child: TextFormField(
                     keyboardType: TextInputType.multiline,

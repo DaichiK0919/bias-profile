@@ -16,13 +16,13 @@ class PlayerList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: kMarginLarge),
+      margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
       decoration: BoxDecoration(
-        color: Colors.grey,
+        color: AppColors.tertiary,
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: Padding(
-        padding: EdgeInsets.all(kPaddingLarge),
+        padding: EdgeInsets.all(AppDimensions.paddingLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -109,9 +109,9 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
               children: [
                 Container(
                   width: double.infinity,
-                  margin: EdgeInsets.symmetric(vertical: kMarginLarge),
+                  margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: AppColors.tertiary,
                     borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                   ),
                   child: PlayerList(
@@ -134,13 +134,13 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
                 if (widget.isCreator)
                   Container(
                     width: double.infinity,
-                    margin: EdgeInsets.symmetric(vertical: kMarginLarge),
+                    margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
                     decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: AppColors.tertiary,
                       borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                     ),
                     child: Padding(
-                      padding: EdgeInsets.all(kPaddingLarge),
+                      padding: EdgeInsets.all(AppDimensions.paddingLarge),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -190,7 +190,7 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
                         widget.isCreator && (snapshot.data ?? 0) > 1;
 
                     return Padding(
-                      padding: EdgeInsets.all(kPaddingMedium),
+                      padding: EdgeInsets.all(AppDimensions.paddingMedium),
                       child: ElevatedButton(
                         onPressed: isButtonActive
                             ? () async {
@@ -214,7 +214,7 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
               ),
             if (widget.isCreator)
               Padding(
-                padding: EdgeInsets.all(kPaddingMedium),
+                padding: EdgeInsets.all(AppDimensions.paddingMedium),
                 child: ElevatedButton(
                   onPressed: () {
                     showConfirmationDialog(
@@ -236,7 +236,7 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
               )
             else
               Padding(
-                padding: EdgeInsets.all(kPaddingMedium),
+                padding: EdgeInsets.all(AppDimensions.paddingMedium),
                 child: ElevatedButton(
                   onPressed: () {
                     showConfirmationDialog(

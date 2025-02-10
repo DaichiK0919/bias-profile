@@ -77,9 +77,9 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
               children: [
                 Container(
                   width: double.infinity,
-                  margin: EdgeInsets.symmetric(vertical: kMarginLarge),
+                  margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: AppColors.tertiary,
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   child: PlayerList(
@@ -128,7 +128,7 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
 
                         return Container(
                           width: double.infinity,
-                          margin: EdgeInsets.all(kMarginLarge),
+                          margin: EdgeInsets.all(AppDimensions.marginLarge),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -137,7 +137,7 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
-                              SizedBox(height: kMarginLarge),
+                              SizedBox(height: AppDimensions.marginLarge),
                               Text(
                                 player['nickname'] as String,
                                 textAlign: TextAlign.center,

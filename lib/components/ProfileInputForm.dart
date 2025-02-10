@@ -60,13 +60,13 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              margin: EdgeInsets.fromLTRB(0, kMarginMedium, 0, kMarginMedium),
+              margin: EdgeInsets.fromLTRB(0, AppDimensions.marginMedium, 0, AppDimensions.marginMedium),
               decoration: BoxDecoration(
-                color: Colors.grey,
+                color: AppColors.tertiary,
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Padding(
-                padding: EdgeInsets.all(kPaddingLarge),
+                padding: EdgeInsets.all(AppDimensions.paddingLarge),
                 child: Column(
                   children: [
                     Text(
@@ -76,8 +76,8 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
                     if (widget.correctCardPath != null)
                       Image.network(
                         widget.correctCardPath!,
-                        width: kProfileImageWidth,
-                        height: kProfileImageHeight,
+                        width: ProfileConstants.imageWidth,
+                        height: ProfileConstants.imageHeight,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) {
                             return child;
@@ -99,7 +99,7 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
             ),
             Container(
               margin: EdgeInsets.fromLTRB(
-                  kMarginLarge, kMarginMedium, kMarginLarge, kPaddingLarge),
+                  AppDimensions.marginLarge, AppDimensions.marginMedium, AppDimensions.marginLarge, AppDimensions.paddingLarge),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -110,7 +110,7 @@ class _ProfileInputFormState extends State<ProfileInputForm> {
                   Form(
                     child: TextFormField(
                       keyboardType: TextInputType.multiline,
-                      maxLines: kProfileMaxLine,
+                      maxLines: ProfileConstants.maxLines,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                       ),

@@ -69,7 +69,7 @@ class _RoomCreateandJoinPageState extends State<RoomCreateandJoinPage> {
           builder: (context) {
             return ProgressDialog(titleText: '参加申請中です・・・');
           });
-      await Future.delayed(Duration(seconds: kProcessingDuration));
+      await Future.delayed(Duration(seconds: AppDurations.processingDuration));
 
       if (roomSnapshot.exists) {
         Map<String, dynamic> roomData = await getRoomSnapshotAsMap(roomId);

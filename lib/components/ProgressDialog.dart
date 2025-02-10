@@ -15,7 +15,7 @@ class ProgressDialog extends StatelessWidget {
       title: Text(titleText),
       children: [
         Padding(
-          padding: EdgeInsets.all(kPaddingLarge),
+          padding: EdgeInsets.all(AppDimensions.paddingLarge),
           child: Center(
             child: CircularProgressIndicator(),
           ),
