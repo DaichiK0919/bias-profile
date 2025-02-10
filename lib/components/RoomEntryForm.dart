@@ -79,6 +79,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
   Widget build(BuildContext context) {
     return Container(
       width: widget.containerWidth,
+      height: MediaQuery.of(context).size.height,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

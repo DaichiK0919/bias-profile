@@ -34,6 +34,11 @@ class AppTheme {
         ),
       ),
 
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+      ),
+
       cardTheme: CardTheme(
         color: AppColors.tertiary,
         elevation: 0,

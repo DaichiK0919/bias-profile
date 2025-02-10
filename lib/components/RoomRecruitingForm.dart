@@ -111,7 +111,7 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
                   width: double.infinity,
                   margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: AppColors.tertiary,
                     borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                   ),
                   child: PlayerList(
@@ -136,7 +136,7 @@ class _RoomRecruitingFormState extends State<RoomRecruitingForm>
                     width: double.infinity,
                     margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
                     decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: AppColors.tertiary,
                       borderRadius: BorderRadius.circular(16.0), // 角を丸くする
                     ),
                     child: Padding(

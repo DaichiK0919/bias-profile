@@ -17,7 +17,7 @@ class UitestProfileInputForm extends StatelessWidget {
               Container(
                 margin: EdgeInsets.fromLTRB(0, AppDimensions.marginMedium, 0, AppDimensions.marginMedium),
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: AppColors.tertiary,
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Padding(
