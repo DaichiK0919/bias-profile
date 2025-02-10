@@ -48,7 +48,7 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
             builder: (BuildContext context) =>
                 ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
           );
-          await Future.delayed(Duration(seconds: kProcessingDuration));
+          await Future.delayed(Duration(seconds: AppDurations.processingDuration));
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

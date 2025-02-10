@@ -86,6 +86,10 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
             key: _formKey,
             child: Column(
               children: [
+                Image.asset(
+                  'assets/images/home_icon.png',
+                ),
+                SizedBox(height: 20),
                 TextFormField(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -117,7 +121,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(kPaddingLarge),
+            padding: EdgeInsets.all(AppDimensions.paddingLarge),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
