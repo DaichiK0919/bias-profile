@@ -12,7 +12,7 @@ class AppTheme {
         error: AppColors.error,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: 'NotoSansJP',
+      fontFamily: 'NotoSansJP',// 豆腐対策
 
       textTheme: TextTheme(
         displayLarge: TextStyle(
@@ -73,6 +73,7 @@ class AppTheme {
         errorStyle: TextStyle(
           color: AppColors.error,
           fontSize: AppDimensions.fontSizeSmall,
+          fontFamily: 'NotoSansJP',// 豆腐対策
         ),
       ),
 
@@ -84,6 +85,7 @@ class AppTheme {
         titleTextStyle: TextStyle(
           fontSize: AppDimensions.fontSizeMedium,
           fontWeight: FontWeight.bold,
+          fontFamily: 'NotoSansJP',// 豆腐対策
           color: AppColors.primary,
         ),
       ),
@@ -92,6 +94,7 @@ class AppTheme {
         backgroundColor: AppColors.primary,
         contentTextStyle: TextStyle(
           fontSize: AppDimensions.fontSizeMedium,
+          fontFamily: 'NotoSansJP',// 豆腐対策
           color: Colors.white,
         ),
         shape: RoundedRectangleBorder(
