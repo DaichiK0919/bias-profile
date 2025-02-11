@@ -1,0 +1,199 @@
+import 'package:flutter/material.dart';
+import 'package:bias_profile/commons/constants.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
+import 'package:bias_profile/components/components.dart';
+import 'package:bias_profile/util/util.dart';
+import 'package:bias_profile/util/RoomStatusMonitor.dart';
+import 'package:bias_profile/Pages/ProfileInputPage.dart';
+
+class ProfileInputForm extends StatefulWidget {
+  final double containerWidth;
+  final String roomId;
+  final String playerId;
+  final String? correctCardPath;
+  final List<String> otherCardPaths;
+  final String? assignedProfileTheme;
+
+  const ProfileInputForm({
+    super.key,
+    required this.containerWidth,
+    required this.roomId,
+    required this.playerId,
+    required this.correctCardPath,
+    this.otherCardPaths = const [],
+    required this.assignedProfileTheme,
+  });
+
+  @override
+  State<ProfileInputForm> createState() => _ProfileInputFormState();
+}
+
+class _ProfileInputFormState extends State<ProfileInputForm>
+    with RoomStatusMonitor {
+  bool _hasPrecached = false; // didChangeDependencies での重複実行を防ぐためのフラグ
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _profileController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasPrecached) {
+      // 他の画像を非同期でプリキャッシュ
+      for (final path in widget.otherCardPaths) {
+        precacheImage(
+          NetworkImage(path),
+          context,
+        ).then((_) {
+          print('Precached other image: $path');
+        }).catchError((e) {
+          print('Other image precaching error: $e');
+        });
+      }
+      _hasPrecached = true;
+    }
+  }
+
+  bool isValidProfile(String profile) {
+    return profile.isNotEmpty && profile.length <= 100;
+  }
+
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: widget.containerWidth,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                  0, AppDimensions.marginMedium, 0, AppDimensions.marginMedium),
+              decoration: BoxDecoration(
+                color: AppColors.tertiary,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(AppDimensions.paddingLarge),
+                child: Column(
+                  children: [
+                    Text(
+                      'こちらの人物の見た目から勝手に想像して\n指定したプロフィールを入力してください',
+                    ),
+                    SizedBox(height: 16.0),
+                    if (widget.correctCardPath != null)
+                      Image.network(
+                        widget.correctCardPath!,
+                        width: ProfileConstants.imageWidth,
+                        height: ProfileConstants.imageHeight,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          print('Image error: $error');
+                          return Text('画像の読み込みに失敗しました');
+                        },
+                      )
+                    else
+                      Text('画像が見つかりません'),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(
+                  AppDimensions.marginLarge,
+                  AppDimensions.marginMedium,
+                  AppDimensions.marginLarge,
+                  AppDimensions.paddingLarge),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.assignedProfileTheme!,
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  Form(
+                    key: _formKey,
+                    child: TextFormField(
+                      validator: (value) {
+                        if (!isValidProfile(value!)) {
+                          return '1〜100文字で入力してください';
+                        }
+                        return null;
+                      },
+                      controller: _profileController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: ProfileConstants.maxLines,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  try {
+                    // まず現在のデータを取得
+                    final roomData = await getRoomSnapshotAsMap(widget.roomId);
+
+                    // current_turnフィールドからprofileリストを取得
+                    final currentTurn =
+                        roomData['current_turn'] as Map<String, dynamic>;
+                    final profiles = List<Map<String, dynamic>>.from(
+                        currentTurn['profiles']);
+
+                    // assigned_player_idが一致するプロフィールを更新
+                    final profileIndex = profiles.indexWhere((profile) =>
+                        profile['assigned_player_id'] == widget.playerId);
+
+                    if (profileIndex != -1) {
+                      profiles[profileIndex]['input_profile'] =
+                          _profileController.text;
+
+                      // 更新したデータをセット
+                      await getRoomRef(widget.roomId)
+                          .update({'current_turn.profiles': profiles});
+
+                      final stillWaiting = profiles
+                          .any((profile) => profile['input_profile'] == null);
+                      if (stillWaiting) {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) => ProgressDialog(
+                            titleText: '他の子が入力中です...',
+                          ),
+                        );
+                      }
+                      print('入力完了: ${_profileController.text}');
+                    } else {
+                      print(
+                          'Assigned profile not found for player: ${widget.playerId}');
+                    }
+                  } catch (e) {
+                    print('Firestore保存エラー: $e');
+                  }
+                } else {
+                  print('入力失敗');
+                }
+              },
+              child: Text('入力完了'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
