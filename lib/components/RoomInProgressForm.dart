@@ -77,7 +77,8 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
               children: [
                 Container(
                   width: double.infinity,
-                  margin: EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
+                  margin:
+                      EdgeInsets.symmetric(vertical: AppDimensions.marginLarge),
                   decoration: BoxDecoration(
                     color: AppColors.tertiary,
                     borderRadius: BorderRadius.circular(16.0),
@@ -176,6 +177,10 @@ class _RoomInProgressFormState extends State<RoomInProgressForm>
                         // プリキャッシュ完了後に何か処理が必要な場合はここに記述
                       });
                     } else {
+                      precacheImage(
+                        NetworkImage(widget.correctCardPath!),
+                        context,
+                      );
                       Navigator.push(
                         context,
                         MaterialPageRoute(
