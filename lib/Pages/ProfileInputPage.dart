@@ -11,7 +11,7 @@ class ProfileInputPage extends StatefulWidget {
   final String? correctCardPath;
   final List<String> otherCardPaths;
   final String? assignedProfileTheme;
-  
+
   const ProfileInputPage({
     super.key,
     required this.roomId,

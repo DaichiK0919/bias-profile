@@ -43,6 +43,7 @@ class _RoomInProgressPageState extends State<RoomInProgressPage> {
 
       final cards =
           List<Map<String, dynamic>>.from(currentTurn['character_cards']);
+
       final profiles = List<Map<String, dynamic>>.from(currentTurn['profiles']);
 
       final assignedProfile = profiles.firstWhere(
