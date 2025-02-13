@@ -11,6 +11,7 @@ class AppDimensions {
 
   static const double fontSizeSmall = 12.0;
   static const double fontSizeMedium = 14.0;
+  static const double fontSizeSemiLarge = 22.0;
   static const double fontSizeLarge = 28.0;
 }
 
@@ -28,7 +29,11 @@ class ProfileConstants {
   static const int maxLines = 3;
 }
 
+class ProfileChoiceConstants {
+  static const double imageWidth = 120;
+  static const double imageHeight = 175;
+}
+
 class AppDurations {
   static const int processingDuration = 3;
 }
-

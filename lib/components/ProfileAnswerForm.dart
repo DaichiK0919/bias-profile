@@ -37,55 +37,61 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(AppDimensions.paddingLarge),
+            padding: EdgeInsets.all(AppDimensions.paddingMedium),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.tertiary,
                 borderRadius: BorderRadius.circular(16.0),
               ),
-              child: Column(
-                children: [
-                  Text(
-                    'どの画像の偏見を行っているか当てよう！',
-                    style: TextStyle(fontSize: AppDimensions.fontSizeMedium),
-                  ),
-                  // 上段の3つ
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children:
-                        widget.randomizedCardsList.sublist(0, 3).map((card) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: AppDimensions.paddingMedium),
-                        child: Image.network(
-                          card['character_card_path'],
-                          width: 96,
-                          height: 142,
-                          fit: BoxFit.contain,
+              child: Padding(
+                padding: EdgeInsets.all(AppDimensions.paddingMedium),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: AppDimensions.paddingMedium),
+                      child: Container(
+                        child: Text(
+                          'どの画像の偏見を言っているか当てよう！',
+                          style: Theme.of(context).textTheme.displayMedium,
                         ),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 8),
-                  // 下段の2つ
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children:
-                        widget.randomizedCardsList.sublist(3, 5).map((card) {
-                      // 3番目から5番目までを取得
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: AppDimensions.paddingMedium),
-                        child: Image.network(
-                          card['character_card_path'],
-                          width: 96,
-                          height: 142,
-                          fit: BoxFit.contain,
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
+                      ),
+                    ),
+
+                    // 上段の3つ
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:
+                          widget.randomizedCardsList.sublist(0, 3).map((card) {
+                        return Padding(
+                          padding: EdgeInsets.all(AppDimensions.paddingMedium),
+                          child: Image.network(
+                            card['character_card_path'],
+                            width: ProfileChoiceConstants.imageWidth,
+                            height: ProfileChoiceConstants.imageHeight,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:
+                          widget.randomizedCardsList.sublist(3, 5).map((card) {
+                        // 3番目から5番目までを取得
+                        return Padding(
+                          padding: EdgeInsets.all(AppDimensions.paddingMedium),
+                          child: Image.network(
+                            card['character_card_path'],
+                            width: ProfileChoiceConstants.imageWidth,
+                            height: ProfileChoiceConstants.imageHeight,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
