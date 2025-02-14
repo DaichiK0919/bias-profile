@@ -30,7 +30,7 @@ class AppTheme {
           fontWeight: FontWeight.normal,
         ),
         bodyMedium: TextStyle(
-          fontSize: AppDimensions.fontSizeMedium,
+          fontSize: AppDimensions.fontSizeSmall,
           fontWeight: FontWeight.normal,
         ),
         labelLarge: TextStyle(
