@@ -24,10 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '偏見プロフィール',
       theme: AppTheme.lightTheme,
-      initialRoute: '/uitest', //for test  UI検証用　遷移後のページのUI作成が難儀にしてきたので
+      // initialRoute: '/uitest', //for test  UI検証用　遷移後のページのUI作成が難儀にしてきたので
       routes: {
         '/': (context) => const HomePage(),
-        '/uitest': (context) => const UitestProfileAnswerForm(),
+        '/uitest': (context) => UitestProfileAnswerForm(),
       },
     );
   }

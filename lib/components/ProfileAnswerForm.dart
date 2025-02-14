@@ -11,14 +11,18 @@ class ProfileAnswerForm extends StatefulWidget {
   final double containerWidth;
   final String roomId;
   final String playerId;
+  final DocumentSnapshot roomData;
   final List<Map<String, dynamic>> randomizedCardsList;
+  final List<Map<String, dynamic>> answers;
 
   const ProfileAnswerForm({
     super.key,
     required this.containerWidth,
     required this.roomId,
     required this.playerId,
+    required this.roomData,
     required this.randomizedCardsList,
+    required this.answers,
   });
 
   @override
@@ -93,6 +97,60 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                   ],
                 ),
               ),
+            ),
+          ),
+          Expanded(
+            child: ListView.separated(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingMedium,
+              ),
+              itemCount: widget.answers.length,
+              separatorBuilder: (context, index) => const Divider(),
+              itemBuilder: (context, index) {
+                final answer = widget.answers[index];
+                return GestureDetector(
+                  onTap: () {
+                    showConfirmationDialog(
+                      context: context,
+                      confirmButtonText: '閉じる',
+                      title: answer['theme'],
+                      content: answer['answer'],
+                    );
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: AppDimensions.paddingSmall,
+                      horizontal: AppDimensions.paddingMedium,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 8,
+                          child: Text(
+                            answer['theme'],
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            answer['nickname'],
+                            style: Theme.of(context).textTheme.bodyLarge,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_right_alt_sharp,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],

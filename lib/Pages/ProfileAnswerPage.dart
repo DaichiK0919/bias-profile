@@ -25,6 +25,7 @@ class ProfileAnswerPage extends StatefulWidget {
 class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
   DocumentSnapshot? _documentSnapshot;
   List<Map<String, dynamic>> _randomizedCardsList = [];
+  List<Map<String, dynamic>> _answers = [];
 
   // ターン数を考慮したシャッフル関数
   List<Map<String, dynamic>> _seededShuffle(
@@ -54,8 +55,14 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
     if (_documentSnapshot != null) {
       final roomData = _documentSnapshot!.data() as Map<String, dynamic>;
 
+      // playersフィールドを取得
+      final players = roomData['players'] as List<dynamic>;
+
       // current_turnフィールドを取得
       final currentTurn = roomData['current_turn'] as Map<String, dynamic>;
+
+      // profilesフィールドを取得
+      final profiles = List<Map<String, dynamic>>.from(currentTurn['profiles']);
 
       // ターン数を取得
       final turnCount = currentTurn['turn_count'] as int;
@@ -64,6 +71,20 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
       _randomizedCardsList = _seededShuffle(
           List<Map<String, dynamic>>.from(currentTurn['character_cards']),
           turnCount);
+
+      // profilesがある子プレイヤーのデータのみを_answersに追加
+      _answers = players.asMap().entries.where((entry) {
+        // そのプレイヤーに対応するprofileデータがある場合のみtrueを返す
+        return entry.key < profiles.length && profiles[entry.key] != null;
+      }).map((entry) {
+        final player = entry.value as Map<String, dynamic>;
+        final profile = profiles[entry.key];
+        return {
+          'theme': profile['profile_theme'] as String? ?? '',
+          'nickname': player['nickname'] as String? ?? '',
+          'answer': profile['input_profile'] as String? ?? '',
+        };
+      }).toList();
     }
     setState(() {});
   }
@@ -90,7 +111,9 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
             containerWidth: containerWidth,
             roomId: widget.roomId,
             playerId: widget.playerId,
+            roomData: _documentSnapshot!,
             randomizedCardsList: _randomizedCardsList,
+            answers: _answers,
           );
         },
       ),
