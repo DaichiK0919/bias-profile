@@ -4,8 +4,8 @@ import 'Pages/HomePage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'commons/firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:bias_profile/UItest/UItest_ProfileInputForm.dart';
-import 'package:bias_profile/UItest/UItest_ProfileAnswerForm.dart';
+// import 'package:bias_profile/UItest/UItest_ProfileInputForm.dart';
+// import 'package:bias_profile/UItest/UItest_ProfileAnswerForm.dart';
 import 'commons/theme.dart';
 
 void main() async {
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       // initialRoute: '/uitest', //for test  UI検証用　遷移後のページのUI作成が難儀にしてきたので
       routes: {
         '/': (context) => const HomePage(),
-        '/uitest': (context) => UitestProfileAnswerForm(),
+        // '/uitest': (context) => UitestProfileAnswerForm(),
       },
     );
   }
