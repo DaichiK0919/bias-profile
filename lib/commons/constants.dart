@@ -30,8 +30,8 @@ class ProfileConstants {
 }
 
 class ProfileChoiceConstants {
-  static const double imageWidth = 120;
-  static const double imageHeight = 175;
+  static const double imageWidth = 110;
+  static const double imageHeight = 160;
 }
 
 class AppDurations {

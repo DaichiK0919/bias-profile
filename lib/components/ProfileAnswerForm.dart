@@ -49,53 +49,73 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
               ),
               child: Padding(
                 padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          vertical: AppDimensions.paddingMedium),
-                      child: Container(
-                        child: Text(
-                          'どの画像の偏見を言っているか当てよう！',
-                          style: Theme.of(context).textTheme.displayMedium,
-                        ),
-                      ),
+                child: Column(children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: AppDimensions.paddingMedium),
+                    child: Text(
+                      'どの画像の偏見を言っているか当てよう！',
+                      style: Theme.of(context).textTheme.displayMedium,
                     ),
+                  ),
 
-                    // 上段の3つ
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          widget.randomizedCardsList.sublist(0, 3).map((card) {
-                        return Padding(
+                  // 上段の3つ
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:
+                        widget.randomizedCardsList.sublist(0, 3).map((card) {
+                      return Flexible(
+                        flex: 1,
+                        child: Padding(
                           padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                          child: Image.network(
-                            card['character_card_path'],
-                            width: ProfileChoiceConstants.imageWidth,
-                            height: ProfileChoiceConstants.imageHeight,
-                            fit: BoxFit.contain,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: ProfileChoiceConstants.imageWidth,
+                              maxHeight: ProfileChoiceConstants.imageHeight,
+                            ),
+                            child: AspectRatio(
+                              aspectRatio: 1.0 / 1.46,
+                              child: Image.network(
+                                card['character_card_path'],
+                                width: ProfileChoiceConstants.imageWidth,
+                                height: ProfileChoiceConstants.imageHeight,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                    Row(
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children:
                           widget.randomizedCardsList.sublist(3, 5).map((card) {
                         // 3番目から5番目までを取得
-                        return Padding(
-                          padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                          child: Image.network(
-                            card['character_card_path'],
-                            width: ProfileChoiceConstants.imageWidth,
-                            height: ProfileChoiceConstants.imageHeight,
-                            fit: BoxFit.contain,
+                        return Flexible(
+                          flex: 1,
+                          child: Padding(
+                            padding:
+                                EdgeInsets.all(AppDimensions.paddingMedium),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: ProfileChoiceConstants.imageWidth,
+                                maxHeight: ProfileChoiceConstants.imageHeight,
+                              ),
+                              child: AspectRatio(
+                                aspectRatio: 1.0 / 1.46,
+                                child: Image.network(
+                                  card['character_card_path'],
+                                  width: ProfileChoiceConstants.imageWidth,
+                                  height: ProfileChoiceConstants.imageHeight,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
                           ),
                         );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+                      }).toList()),
+                ]),
               ),
             ),
           ),
@@ -123,6 +143,7 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                       horizontal: AppDimensions.paddingMedium,
                     ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
                           flex: 8,
