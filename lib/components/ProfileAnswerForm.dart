@@ -67,13 +67,30 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children:
                           widget.randomizedCardsList.sublist(0, 3).map((card) {
-                        return Padding(
-                          padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                          child: Image.network(
-                            card['character_card_path'],
-                            width: ProfileChoiceConstants.imageWidth,
-                            height: ProfileChoiceConstants.imageHeight,
-                            fit: BoxFit.contain,
+                        return GestureDetector(
+                          onTap: () {
+                            showConfirmationDialog(
+                              context: context,
+                              confirmButtonText: 'OK',
+                              cancelButtonText: '閉じる',
+                              title: 'この人物に決めますか？',
+                              content: Image.network(
+                                card['character_card_path'],
+                                width: ProfileConstants.imageWidth,
+                                height: ProfileConstants.imageHeight,
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding:
+                                EdgeInsets.all(AppDimensions.paddingMedium),
+                            child: Image.network(
+                              card['character_card_path'],
+                              width: ProfileChoiceConstants.imageWidth,
+                              height: ProfileChoiceConstants.imageHeight,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         );
                       }).toList(),
@@ -83,13 +100,30 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                       children:
                           widget.randomizedCardsList.sublist(3, 5).map((card) {
                         // 3番目から5番目までを取得
-                        return Padding(
-                          padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                          child: Image.network(
-                            card['character_card_path'],
-                            width: ProfileChoiceConstants.imageWidth,
-                            height: ProfileChoiceConstants.imageHeight,
-                            fit: BoxFit.contain,
+                        return GestureDetector(
+                          onTap: () {
+                            showConfirmationDialog(
+                              context: context,
+                              confirmButtonText: 'OK',
+                              cancelButtonText: '閉じる',
+                              title: 'この人物に決めますか？',
+                              content: Image.network(
+                                card['character_card_path'],
+                                width: ProfileConstants.imageWidth,
+                                height: ProfileConstants.imageHeight,
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding:
+                                EdgeInsets.all(AppDimensions.paddingMedium),
+                            child: Image.network(
+                              card['character_card_path'],
+                              width: ProfileChoiceConstants.imageWidth,
+                              height: ProfileChoiceConstants.imageHeight,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         );
                       }).toList(),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ConfirmationDialog extends StatelessWidget {
   final String title;
-  final String? content; // 追加
+  final dynamic content; // String または Widget を受け付けるように変更
   final String cancelButtonText;
   final String confirmButtonText;
   final VoidCallback? onCancel;
@@ -12,7 +12,7 @@ class ConfirmationDialog extends StatelessWidget {
   const ConfirmationDialog({
     Key? key,
     required this.title,
-    this.content, // 追加
+    this.content,
     this.cancelButtonText = '閉じる',
     this.confirmButtonText = 'OK',
     this.onCancel,
@@ -24,7 +24,7 @@ class ConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(title),
-      content: content != null ? Text(content!) : null, // 追加
+      content: _buildContent(), // contentの構築を別メソッドに分離
       actions: <Widget>[
         if (onCancel != null)
           TextButton(
@@ -54,12 +54,25 @@ class ConfirmationDialog extends StatelessWidget {
       ],
     );
   }
+
+  Widget? _buildContent() {
+    if (content == null) {
+      return null;
+    }
+    if (content is String) {
+      return Text(content as String);
+    }
+    if (content is Widget) {
+      return content as Widget;
+    }
+    return null;
+  }
 }
 
 Future<void> showConfirmationDialog({
   required BuildContext context,
   required String title,
-  String? content,
+  dynamic content, // String または Widget を受け付けるように変更
   String cancelButtonText = '閉じる',
   String confirmButtonText = 'OK',
   VoidCallback? onCancel,
