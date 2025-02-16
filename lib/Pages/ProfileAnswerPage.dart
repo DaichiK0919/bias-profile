@@ -73,12 +73,16 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
           turnCount);
 
       // profilesがある子プレイヤーのデータのみを_answersに追加
-      _answers = players.asMap().entries.where((entry) {
-        // そのプレイヤーに対応するprofileデータがある場合のみtrueを返す
-        return entry.key < profiles.length && profiles[entry.key] != null;
-      }).map((entry) {
-        final player = entry.value as Map<String, dynamic>;
-        final profile = profiles[entry.key];
+      _answers = profiles.where((profile) {
+        // 親プレイヤー以外のプロフィールを取得
+        return profile['assigned_player_id'] != currentTurn['parent_player_id'];
+      }).map((profile) {
+        // 対応するプレイヤーを探す
+        final player = players.firstWhere(
+          (player) => player['player_id'] == profile['assigned_player_id'],
+          orElse: () => {'nickname': 'Unknown'},
+        );
+
         return {
           'theme': profile['profile_theme'] as String? ?? '',
           'nickname': player['nickname'] as String? ?? '',
