@@ -26,6 +26,8 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
   DocumentSnapshot? _documentSnapshot;
   List<Map<String, dynamic>> _randomizedCardsList = [];
   List<Map<String, dynamic>> _answers = [];
+  List<Map<String, dynamic>> _characterCards = [];
+  String? _parentPlayerId;
 
   // ターン数を考慮したシャッフル関数
   List<Map<String, dynamic>> _seededShuffle(
@@ -34,14 +36,21 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
     final seed = widget.roomId.hashCode ^ turnCount;
     final random = Random(seed);
 
-    final shuffled = List<Map<String, dynamic>>.from(list);
-    for (var i = shuffled.length - 1; i > 0; i--) {
+    // 元のindexを追加したリストを作成
+    final indexedList = list
+        .asMap()
+        .entries
+        .map((entry) => {...entry.value, 'original_index': entry.key})
+        .toList();
+
+    // シャッフル
+    for (var i = indexedList.length - 1; i > 0; i--) {
       final j = random.nextInt(i + 1);
-      final temp = shuffled[i];
-      shuffled[i] = shuffled[j];
-      shuffled[j] = temp;
+      final temp = indexedList[i];
+      indexedList[i] = indexedList[j];
+      indexedList[j] = temp;
     }
-    return shuffled;
+    return indexedList;
   }
 
   @override
@@ -89,8 +98,21 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
           'answer': profile['input_profile'] as String? ?? '',
         };
       }).toList();
+
+      // 正誤判定用のデータを取得
+      _characterCards =
+          List<Map<String, dynamic>>.from(currentTurn['character_cards']);
+      _parentPlayerId = currentTurn['parent_player_id'] as String;
     }
     setState(() {});
+  }
+
+  bool _checkIsCorrect(int originalIndex) {
+    return _characterCards[originalIndex]['is_correct'] == true;
+  }
+
+  bool _isParentPlayer() {
+    return widget.playerId == _parentPlayerId;
   }
 
   @override
@@ -118,6 +140,8 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
             roomData: _documentSnapshot!,
             randomizedCardsList: _randomizedCardsList,
             answers: _answers,
+            checkIsCorrect: _checkIsCorrect,
+            isParentPlayer: _isParentPlayer(), //boolean
           );
         },
       ),
