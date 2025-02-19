@@ -29,6 +29,7 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
   List<Map<String, dynamic>> _characterCards = [];
   String? _parentPlayerId;
 
+
   // ターン数を考慮したシャッフル関数
   List<Map<String, dynamic>> _seededShuffle(
       List<Map<String, dynamic>> list, int turnCount) {
@@ -103,6 +104,7 @@ class _ProfileAnswerPageState extends State<ProfileAnswerPage> {
       _characterCards =
           List<Map<String, dynamic>>.from(currentTurn['character_cards']);
       _parentPlayerId = currentTurn['parent_player_id'] as String;
+
     }
     setState(() {});
   }
