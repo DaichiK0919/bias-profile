@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
 import 'package:bias_profile/util/RoomStatusMonitor.dart';
-import 'package:bias_profile/Pages/ProfileInputPage.dart';
 
 class ProfileAnswerForm extends StatefulWidget {
   final double containerWidth;
@@ -14,6 +13,8 @@ class ProfileAnswerForm extends StatefulWidget {
   final DocumentSnapshot roomData;
   final List<Map<String, dynamic>> randomizedCardsList;
   final List<Map<String, dynamic>> answers;
+  final bool Function(int) checkIsCorrect;
+  final bool isParentPlayer;
 
   const ProfileAnswerForm({
     super.key,
@@ -23,6 +24,8 @@ class ProfileAnswerForm extends StatefulWidget {
     required this.roomData,
     required this.randomizedCardsList,
     required this.answers,
+    required this.checkIsCorrect,
+    required this.isParentPlayer,
   });
 
   @override
@@ -34,6 +37,106 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
   @override
   void initState() {
     super.initState();
+  }
+
+  // カード選択時の処理を共通化
+  Future<void> _handleCardSelection(
+      Map<String, dynamic> card, BuildContext context) async {
+    if (!widget.isParentPlayer) return;
+
+    showConfirmationDialog(
+      context: context,
+      confirmButtonText: 'OK',
+      cancelButtonText: 'キャンセル',
+      title: 'この人物に決めますか？',
+      content: Image.network(
+        card['character_card_path'],
+        width: ProfileConstants.imageWidth,
+        height: ProfileConstants.imageHeight,
+        fit: BoxFit.contain,
+      ),
+      onConfirm: () async {
+        // parent_answerを更新
+        await getRoomRef(widget.roomId)
+            .update({'current_turn.parent_answer': card['original_index']});
+
+        // 正誤判定
+        final isCorrect = widget.checkIsCorrect(card['original_index']);
+
+        Navigator.pop(context);
+
+        if (isCorrect && widget.isParentPlayer) {
+          showConfirmationDialog(
+              context: context,
+              title: '正解！！',
+              content: Image.network(
+                card['character_card_path'],
+                width: ProfileConstants.imageWidth,
+                height: ProfileConstants.imageHeight,
+                fit: BoxFit.contain,
+              ),
+              confirmButtonText: '次へ進む',
+              onConfirm: () async {
+                await getRoomRef(widget.roomId)
+                    .update({'current_turn.can_start_next_turn': true});
+              });
+        } else {
+          showConfirmationDialog(
+            context: context,
+            title: '不正解...正解はこちら',
+            content: Image.network(
+              widget.randomizedCardsList.firstWhere(
+                  (card) => card['original_index'] == 0)['character_card_path'],
+              width: ProfileConstants.imageWidth,
+              height: ProfileConstants.imageHeight,
+              fit: BoxFit.contain,
+            ),
+            confirmButtonText: '次へ進む',
+            onConfirm: () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) =>
+                    const ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
+              );
+              await getRoomRef(widget.roomId)
+                  .update({'current_turn.can_start_next_turn': true});
+            },
+          );
+        }
+      },
+      onCancel: () {},
+    );
+  }
+
+  // カード表示用のウィジェットを共通化
+  Widget _buildCardItem(Map<String, dynamic> card) {
+    return Flexible(
+      flex: 1,
+      child: GestureDetector(
+        onTap: widget.isParentPlayer
+            ? () => _handleCardSelection(card, context)
+            : null,
+        child: Padding(
+          padding: EdgeInsets.all(AppDimensions.paddingMedium),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: ProfileChoiceConstants.imageWidth,
+              maxHeight: ProfileChoiceConstants.imageHeight,
+            ),
+            child: AspectRatio(
+              aspectRatio: 1.0 / 1.46,
+              child: Image.network(
+                card['character_card_path'],
+                width: ProfileChoiceConstants.imageWidth,
+                height: ProfileChoiceConstants.imageHeight,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget build(BuildContext context) {
@@ -54,7 +157,9 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                     padding: EdgeInsets.symmetric(
                         vertical: AppDimensions.paddingMedium),
                     child: Text(
-                      'どの画像の偏見を言っているか当てよう！',
+                      widget.isParentPlayer
+                          ? 'どの画像の偏見を言っているか当てよう！'
+                          : '親が回答している間、他のプレイヤーが入力したプロフィールを覗いてみましょう',
                       style: Theme.of(context).textTheme.displayMedium,
                     ),
                   ),
@@ -62,59 +167,19 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                   // 上段の3つ
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children:
-                        widget.randomizedCardsList.sublist(0, 3).map((card) {
-                      return Flexible(
-                        flex: 1,
-                        child: Padding(
-                          padding: EdgeInsets.all(AppDimensions.paddingMedium),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: ProfileChoiceConstants.imageWidth,
-                              maxHeight: ProfileChoiceConstants.imageHeight,
-                            ),
-                            child: AspectRatio(
-                              aspectRatio: 1.0 / 1.46,
-                              child: Image.network(
-                                card['character_card_path'],
-                                width: ProfileChoiceConstants.imageWidth,
-                                height: ProfileChoiceConstants.imageHeight,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                    children: widget.randomizedCardsList
+                        .sublist(0, 3)
+                        .map(_buildCardItem)
+                        .toList(),
                   ),
+                  // 下段の2つ
                   Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          widget.randomizedCardsList.sublist(3, 5).map((card) {
-                        // 3番目から5番目までを取得
-                        return Flexible(
-                          flex: 1,
-                          child: Padding(
-                            padding:
-                                EdgeInsets.all(AppDimensions.paddingMedium),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: ProfileChoiceConstants.imageWidth,
-                                maxHeight: ProfileChoiceConstants.imageHeight,
-                              ),
-                              child: AspectRatio(
-                                aspectRatio: 1.0 / 1.46,
-                                child: Image.network(
-                                  card['character_card_path'],
-                                  width: ProfileChoiceConstants.imageWidth,
-                                  height: ProfileChoiceConstants.imageHeight,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList()),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: widget.randomizedCardsList
+                        .sublist(3, 5)
+                        .map(_buildCardItem)
+                        .toList(),
+                  ),
                 ]),
               ),
             ),
