@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:bias_profile/components/components.dart';
 import 'package:bias_profile/util/util.dart';
 import 'package:bias_profile/util/RoomStatusMonitor.dart';
+import 'package:bias_profile/Pages/ChooseBestHintPage.dart';
 
 class ProfileAnswerForm extends StatefulWidget {
   final double containerWidth;
@@ -82,8 +83,13 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
               ),
               confirmButtonText: '次へ進む',
               onConfirm: () async {
-                await getRoomRef(widget.roomId)
-                    .update({'current_turn.can_start_next_turn': true});
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChooseBestHintPage(
+                              roomId: widget.roomId,
+                              playerId: widget.playerId,
+                            )));
               });
         } else {
           showConfirmationDialog(
