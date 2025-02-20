@@ -37,6 +37,11 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
   @override
   void initState() {
     super.initState();
+    startRoomStatusMonitoring(
+      widget.roomId,
+      widget.playerId,
+      skipProfileNavigation: true, // ProfileAnswerPage上での監視なのでスキップ
+    );
   }
 
   // カード選択時の処理を共通化
