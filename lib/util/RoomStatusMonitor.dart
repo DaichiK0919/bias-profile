@@ -66,8 +66,25 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
                 builder: (BuildContext context) =>
                     const ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
               );
-              await getRoomRef(roomId)
-                  .update({'current_turn.can_start_next_turn': true});
+              DocumentReference roomRef = getRoomRef(roomId);
+              Map<String, dynamic> roomData =
+                  await getRoomSnapshotAsMap(roomId);
+              List<dynamic> players = roomData['players'];
+
+              int playerIndex = players
+                  .indexWhere((player) => player['player_id'] == playerId);
+
+              if (playerIndex != -1) {
+                players[playerIndex]['can_start_next_turn'] = true;
+
+                await roomRef.update({
+                  'players': players,
+                });
+
+                print('プレイヤー $playerId のcan_start_next_turnが更新されました。');
+              } else {
+                print('プレイヤー $playerId が見つかりませんでした。');
+              }
             },
           );
         });

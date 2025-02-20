@@ -110,8 +110,25 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
                 builder: (BuildContext context) =>
                     const ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
               );
-              await getRoomRef(widget.roomId)
-                  .update({'current_turn.can_start_next_turn': true});
+              DocumentReference roomRef = getRoomRef(widget.roomId);
+              Map<String, dynamic> roomData =
+                  await getRoomSnapshotAsMap(widget.roomId);
+              List<dynamic> players = roomData['players'];
+
+              int playerIndex = players.indexWhere(
+                  (player) => player['player_id'] == widget.playerId);
+
+              if (playerIndex != -1) {
+                players[playerIndex]['can_start_next_turn'] = true;
+
+                await roomRef.update({
+                  'players': players,
+                });
+
+                print('プレイヤー $widget.playerId のcan_start_next_turnが更新されました。');
+              } else {
+                print('プレイヤー $widget.playerId が見つかりませんでした。');
+              }
             },
           );
         }
