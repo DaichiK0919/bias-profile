@@ -10,12 +10,14 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
   late Stream<DocumentSnapshot>? _roomStream;
   late Stream<DocumentSnapshot<Map<String, dynamic>>> _roomStreamAsMap;
   bool _hasShownCancelMessage = false;
-  int? _lastTurnCount; // 前回のターン数を保持
+  int? _lastTurnCount;
+  int? _lastParentAnswer; // 前回の親の回答を保持
 
   void startRoomStatusMonitoring(
     String roomId,
     String playerId, {
     bool isCreator = false,
+    bool skipProfileNavigation = false, // ProfileAnswerPage上での監視時はtrueを設定
   }) {
     _roomStream = getRoomSnapshotAsStream(roomId);
     _roomStreamAsMap = getRoomSnapshotAsStream(roomId)
@@ -29,6 +31,64 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
 
       final currentTurn = data['current_turn'] as Map<String, dynamic>;
       final currentTurnCount = currentTurn['turn_count'] as int? ?? 0;
+      final parentAnswer = currentTurn['parent_answer'] as int?;
+      final parentPlayerId = currentTurn['parent_player_id'] as String?;
+
+      // 親プレイヤー以外に対して、parent_answerが更新されたときにダイアログを表示
+      if (parentAnswer != null &&
+          parentAnswer != _lastParentAnswer &&
+          playerId != parentPlayerId) {
+        _lastParentAnswer = parentAnswer;
+
+        // 既存のダイアログをすべて閉じる
+        Navigator.of(context).popUntil((route) => route.isCurrent);
+
+        // 少し遅延を入れてから親の回答ダイアログを表示
+        Future.delayed(const Duration(milliseconds: 100), () {
+          final characterCards =
+              List<Map<String, dynamic>>.from(currentTurn['character_cards']);
+          final selectedCard = characterCards[parentAnswer];
+
+          showConfirmationDialog(
+            context: context,
+            title: '親が選択した人物',
+            content: Image.network(
+              selectedCard['character_card_path'],
+              width: ProfileConstants.imageWidth,
+              height: ProfileConstants.imageHeight,
+              fit: BoxFit.contain,
+            ),
+            confirmButtonText: '次に進む',
+            onConfirm: () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) =>
+                    const ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
+              );
+              DocumentReference roomRef = getRoomRef(roomId);
+              Map<String, dynamic> roomData =
+                  await getRoomSnapshotAsMap(roomId);
+              List<dynamic> players = roomData['players'];
+
+              int playerIndex = players
+                  .indexWhere((player) => player['player_id'] == playerId);
+
+              if (playerIndex != -1) {
+                players[playerIndex]['can_start_next_turn'] = true;
+
+                await roomRef.update({
+                  'players': players,
+                });
+
+                print('プレイヤー $playerId のcan_start_next_turnが更新されました。');
+              } else {
+                print('プレイヤー $playerId が見つかりませんでした。');
+              }
+            },
+          );
+        });
+      }
 
       switch (data['status']) {
         case 'closed' when !isCreator && !_hasShownCancelMessage:
@@ -67,22 +127,21 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
           );
           break;
 
-        // プロフィール入力の監視を追加
         case _
-            when currentTurn['profiles'] != null &&
+            when !skipProfileNavigation && // ProfileAnswerPage上ではスキップ
+                currentTurn['profiles'] != null &&
                 currentTurn['parent_answer'] == null:
           final profiles =
               List<Map<String, dynamic>>.from(currentTurn['profiles']);
 
           if (profiles.isEmpty) {
-            break; // 空の場合は何もしない
+            break;
           }
 
           final allProfilesCompleted = profiles.every((profile) =>
               profile.containsKey('input_profile') &&
               profile['input_profile'] != null);
 
-          // 自分の入力状態を確認
           final myProfile = profiles.firstWhere(
             (profile) => profile['assigned_player_id'] == playerId,
             orElse: () => {'input_profile': null},
@@ -104,7 +163,6 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
           break;
       }
 
-      // 現在のターン数を保存
       _lastTurnCount = currentTurnCount;
       print('保存されたlastTurnCount:$_lastTurnCount');
     });
@@ -113,7 +171,8 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
   @override
   void dispose() {
     _roomStream = null;
-    _lastTurnCount = null; // リセット
+    _lastTurnCount = null;
+    _lastParentAnswer = null; // 追加
     super.dispose();
   }
 }
