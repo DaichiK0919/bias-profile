@@ -46,6 +46,7 @@ class _ChooseBestHintFormState extends State<ChooseBestHintForm>
       Map<String, dynamic> profile, BuildContext context) async {
     final playerNickname = profile['player_nickname'] ?? '不明なプレイヤー';
 
+    // まず詳細表示ダイアログを表示
     showConfirmationDialog(
       context: context,
       confirmButtonText: '決定',
@@ -62,7 +63,7 @@ class _ChooseBestHintFormState extends State<ChooseBestHintForm>
       onConfirm: () async {
         Navigator.pop(context);
 
-        // 確認ダイアログを表示
+        // ポイント付与確認ダイアログを表示
         showConfirmationDialog(
           context: context,
           confirmButtonText: 'OK',
@@ -78,7 +79,7 @@ class _ChooseBestHintFormState extends State<ChooseBestHintForm>
                   const ProgressDialog(titleText: 'ポイントを付与しています'),
             );
 
-            // 最初にroomRefを一度だけ取得
+            // roomRefを一度だけ取得
             DocumentReference roomRef = getRoomRef(widget.roomId);
 
             try {
@@ -97,59 +98,61 @@ class _ChooseBestHintFormState extends State<ChooseBestHintForm>
                 players[selectedPlayerIndex]['points'] = currentPoints + 1;
               }
 
-              // Firestoreを更新（この時点ではcan_start_next_turnは更新しない）
+              // Firestoreを更新（ポイントのみ更新）
               await roomRef.update({
                 'players': players,
               });
 
               Navigator.pop(context); // ProgressDialogを閉じる
 
-              // 成功メッセージを表示し、次へ進むボタンが押されたときに
-              // can_start_next_turnを更新するロジックを実行
-              showConfirmationDialog(
+              // 成功メッセージとプログレスインジケーターを表示（自動的に閉じる）
+              showDialog(
                 context: context,
-                confirmButtonText: '次へ進む',
-                title: 'ポイントを付与しました',
-                content: Text('$playerNicknameさんにポイントを付与しました。'),
-                onConfirm: () async {
-                  // 次へ進むが押されたときに実行
-                  try {
-                    // 最新データを取得（roomRefは再利用）
-                    Map<String, dynamic> updatedRoomData =
-                        await getRoomSnapshotAsMap(widget.roomId);
-                    List<dynamic> updatedPlayers = updatedRoomData['players'];
-
-                    // 自分のプレイヤーインデックスを取得
-                    int playerIndex = updatedPlayers.indexWhere(
-                        (player) => player['player_id'] == widget.playerId);
-
-                    if (playerIndex != -1) {
-                      // can_start_next_turnをtrueに設定
-                      updatedPlayers[playerIndex]['can_start_next_turn'] = true;
-
-                      // Firestoreを更新（roomRefを再利用）
-                      await roomRef.update({
-                        'players': updatedPlayers,
-                      });
-
-                      print(
-                          'プレイヤー ${widget.playerId} のcan_start_next_turnが更新されました。');
-                    } else {
-                      print('プレイヤー ${widget.playerId} が見つかりませんでした。');
-                    }
-                  } catch (e) {
-                    print('エラーが発生しました: $e');
-
-                    // エラーメッセージを表示
-                    showConfirmationDialog(
-                      context: context,
-                      confirmButtonText: '閉じる',
-                      title: 'エラーが発生しました',
-                      content: Text('操作中にエラーが発生しました: $e'),
-                    );
-                  }
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('ポイントを付与しました'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text('他のプレイヤーの準備待ち...'),
+                        const SizedBox(height: 16),
+                        const CircularProgressIndicator(),
+                      ],
+                    ),
+                  );
                 },
               );
+
+              // 3秒後に自動的にダイアログを閉じ、その後can_start_next_turnを更新
+              await Future.delayed(
+                  Duration(seconds: AppDurations.processingDuration));
+
+              // 既存のダイアログをすべて閉じる
+              Navigator.of(context).popUntil((route) => route.isCurrent);
+
+              // 最新のプレイヤーデータを再取得
+              Map<String, dynamic> updatedRoomData =
+                  await getRoomSnapshotAsMap(widget.roomId);
+              List<dynamic> updatedPlayers = updatedRoomData['players'];
+
+              // 自分のプレイヤーインデックスを取得
+              int playerIndex = updatedPlayers.indexWhere(
+                  (player) => player['player_id'] == widget.playerId);
+
+              if (playerIndex != -1) {
+                // can_start_next_turnをtrueに設定
+                updatedPlayers[playerIndex]['can_start_next_turn'] = true;
+
+                // Firestoreを更新（can_start_next_turnのみ）
+                await roomRef.update({
+                  'players': updatedPlayers,
+                });
+
+                print(
+                    '3秒後にプレイヤー ${widget.playerId} のcan_start_next_turnが更新されました。');
+              }
             } catch (e) {
               Navigator.pop(context); // ProgressDialogを閉じる
 
@@ -159,6 +162,7 @@ class _ChooseBestHintFormState extends State<ChooseBestHintForm>
                 confirmButtonText: '閉じる',
                 title: 'エラーが発生しました',
                 content: Text('操作中にエラーが発生しました: $e'),
+                onCancel: () {},
               );
             }
           },
@@ -237,8 +241,10 @@ class _ChooseBestHintFormState extends State<ChooseBestHintForm>
               ),
             ),
           ),
-          Text('ベストヒントを選択してください'),
-          Text('選択したプレイヤーに1pt与えられます'),
+          Padding(
+            padding: EdgeInsets.all(AppDimensions.paddingMedium),
+            child: Text('ベストヒントを選択してください\n選択したプレイヤーに1pt与えられます'),
+          ),
           Expanded(
             child: ListView.separated(
               padding: EdgeInsets.symmetric(
