@@ -5,6 +5,7 @@ import './util.dart';
 import 'package:bias_profile/Pages/RoomInProgressPage.dart';
 import 'package:bias_profile/Pages/ProfileAnswerPage.dart';
 import 'package:bias_profile/commons/constants.dart';
+import 'package:bias_profile/Pages/ResultPage.dart';
 
 mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
   late Stream<DocumentSnapshot>? _roomStream;
@@ -92,6 +93,26 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
       }
 
       switch (data['status']) {
+        // ゲーム終了条件を追加: statusがclosedかつturn_countが-1の場合
+        case 'closed' when currentTurnCount == -1:
+          print('ゲーム終了を検知: 最終結果画面に遷移します');
+
+          // 既存のダイアログをすべて閉じる
+          Navigator.of(context).popUntil((route) => route.isCurrent);
+
+          // 結果画面に遷移
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResultPage(
+                roomId: roomId,
+                playerId: playerId,
+                stream: _roomStreamAsMap,
+              ),
+            ),
+          );
+          break;
+
         case 'closed' when !isCreator && !_hasShownCancelMessage:
           print('部屋のステータスが closed になったのを検知');
           _hasShownCancelMessage = true;
