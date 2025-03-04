@@ -12,6 +12,7 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
   bool _hasShownCancelMessage = false;
   int? _lastTurnCount;
   int? _lastParentAnswer; // 前回の親の回答を保持
+  bool _isProcessingTurnChange = false; // ターンの変更処理中かどうかを示すフラグ
 
   void startRoomStatusMonitoring(
     String roomId,
@@ -103,18 +104,42 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
           break;
 
         case _
-            when _lastTurnCount != null && currentTurnCount > _lastTurnCount!:
+            when _lastTurnCount != null &&
+                currentTurnCount > _lastTurnCount! &&
+                !_isProcessingTurnChange:
+          // ターン変更処理中フラグをセット
+          _isProcessingTurnChange = true;
+
           print('lastTurnCount:$_lastTurnCount');
           print('currentTurnCount:$currentTurnCount');
           print('ターン数の増加を検知');
+
+          // 既存のダイアログをすべて閉じる
+          Navigator.of(context).popUntil((route) => route.isCurrent);
+
+          // 少し遅延を入れてからダイアログを表示（他のダイアログが完全に閉じるのを待つ）
+          await Future.delayed(const Duration(milliseconds: 100));
+
+          if (!mounted) {
+            _isProcessingTurnChange = false;
+            return;
+          }
+
           showDialog(
             context: context,
             barrierDismissible: false,
             builder: (BuildContext context) =>
                 ProgressDialog(titleText: 'ターンを開始する準備をしています。'),
           );
+
           await Future.delayed(
               Duration(seconds: AppDurations.processingDuration));
+
+          if (!mounted) {
+            _isProcessingTurnChange = false;
+            return;
+          }
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -125,6 +150,9 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
               ),
             ),
           );
+
+          // フラグをリセット
+          _isProcessingTurnChange = false;
           break;
 
         case _
@@ -148,7 +176,9 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
           );
 
           if (allProfilesCompleted) {
+            // 既存のダイアログをすべて閉じる
             Navigator.of(context).popUntil((route) => route.isFirst);
+
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -172,7 +202,8 @@ mixin RoomStatusMonitor<T extends StatefulWidget> on State<T> {
   void dispose() {
     _roomStream = null;
     _lastTurnCount = null;
-    _lastParentAnswer = null; // 追加
+    _lastParentAnswer = null;
+    _isProcessingTurnChange = false;
     super.dispose();
   }
 }

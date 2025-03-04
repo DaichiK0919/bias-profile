@@ -72,6 +72,34 @@ class _ProfileAnswerFormState extends State<ProfileAnswerForm>
         Navigator.pop(context);
 
         if (isCorrect && widget.isParentPlayer) {
+          // 正解の場合、親プレイヤーにポイントを追加
+          try {
+            // Firestoreからプレイヤーデータを取得
+            DocumentReference roomRef = getRoomRef(widget.roomId);
+            Map<String, dynamic> roomData =
+                await getRoomSnapshotAsMap(widget.roomId);
+            List<dynamic> players = roomData['players'];
+
+            // 自分（親プレイヤー）のインデックスを取得
+            int playerIndex = players
+                .indexWhere((player) => player['player_id'] == widget.playerId);
+
+            if (playerIndex != -1) {
+              // ポイントを+1
+              int currentPoints = players[playerIndex]['points'] ?? 0;
+              players[playerIndex]['points'] = currentPoints + 1;
+
+              // Firestoreを更新
+              await roomRef.update({
+                'players': players,
+              });
+
+              print('親プレイヤー ${widget.playerId} にポイントが付与されました。');
+            }
+          } catch (e) {
+            print('ポイント付与中にエラーが発生しました: $e');
+          }
+
           showConfirmationDialog(
               context: context,
               title: '正解！！',
