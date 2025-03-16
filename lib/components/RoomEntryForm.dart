@@ -27,16 +27,16 @@ class RoomEntryForm extends StatefulWidget {
 class _RoomEntryFormState extends State<RoomEntryForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nicknameController = TextEditingController();
-  final TextEditingController _roomIdController =
-      TextEditingController(); //for test
+  // final TextEditingController _roomIdController =
+  //     TextEditingController(); //for test
   FirebaseFirestore db = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialRoomId != null) {
-      _roomIdController.text = widget.initialRoomId!;
-    } // for test
+    // if (widget.initialRoomId != null) {
+    //   _roomIdController.text = widget.initialRoomId!;
+    // } // for test
   }
 
   bool isValidNickname(String nickname) {
@@ -107,16 +107,16 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 20), // for test
-                Text('テスト用'),
-                TextFormField(
-                  controller: _roomIdController,
-                  decoration: InputDecoration(
-                    labelText: '部屋IDを入力 (新規作成時は空欄)',
-                    labelStyle: Theme.of(context).textTheme.labelMedium,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                // SizedBox(height: 20), // for test
+                // Text('テスト用'),
+                // TextFormField(
+                //   controller: _roomIdController,
+                //   decoration: InputDecoration(
+                //     labelText: '部屋IDを入力 (新規作成時は空欄)',
+                //     labelStyle: Theme.of(context).textTheme.labelMedium,
+                //     border: OutlineInputBorder(),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -127,10 +127,11 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    String? roomId = widget.initialRoomId != null
-                        ? widget.initialRoomId
-                        : _roomIdController.text;
-                    // for test  本番は　roomId = widget.initialRoomId でOK
+                    String? roomId = widget.initialRoomId;
+                    // String? roomId = widget.initialRoomId != null
+                    //     ? widget.initialRoomId
+                    //     : _roomIdController.text;
+                    // // for test  本番は　roomId = widget.initialRoomId でOK
                     String nickname = _nicknameController.text;
                     if (_formKey.currentState!.validate()) {
                       if (roomId!.isNotEmpty) {
