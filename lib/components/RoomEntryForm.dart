@@ -134,7 +134,7 @@ class _RoomEntryFormState extends State<RoomEntryForm> {
                     // // for test  本番は　roomId = widget.initialRoomId でOK
                     String nickname = _nicknameController.text;
                     if (_formKey.currentState!.validate()) {
-                      if (roomId!.isNotEmpty) {
+                      if (roomId != null && roomId.isNotEmpty) {
                         widget.onRoomJoined(roomId, nickname);
                       } else {
                         try {
